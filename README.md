@@ -14,8 +14,8 @@ randomize tournaments while still keeping things balanced.
 Example usages:
 
 ```
-python shuffle_seeds.py 9
-=> [1, 2, 3, 4, 6, 5, 8, 7, 9]
+$ python shuffle_seeds.py 9
+[1, 2, 3, 4, 6, 5, 8, 7, 9]
 ```
 
 Returns the newly shuffled seeding order for a tournament with a given number
@@ -23,7 +23,7 @@ of participants. Each number indicates where the corresponding seed should be
 listed.
 
 ```
-python shuffle_seeds.py "Neal, Bryan, Paragon, gaR, Admiral Lightning Bolt, Eden"
+$ python shuffle_seeds.py "Neal, Bryan, Paragon, gaR, Admiral Lightning Bolt, Eden"
 ['Neal', 'Bryan', 'Paragon', 'gaR', 'Eden', 'Admiral Lightning Bolt']
 ```
 
