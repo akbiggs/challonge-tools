@@ -6,7 +6,7 @@ These functions help you shuffle a bracket while still preserving the projected
 placement of each participant at the end of the tournament. This helps
 randomize tournaments while still keeping things balanced.
 
-Example usages:
+Examples:
 
 1. python shuffle_seeds.py 9
    => [1, 2, 3, 4, 6, 5, 8, 7, 9]
