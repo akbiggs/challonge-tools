@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Challonge Credentials
+akbiggs_challonge.ini
+
+# Local installed PIP packages
+src/
