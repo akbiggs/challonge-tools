@@ -5,13 +5,13 @@ easier.
 
 # Shuffle Seeds
 
-Utilities for shuffling seeds in a tournament.
+`shuffle_seeds.py`: Utilities for shuffling seeds in a tournament.
 
 These functions help you shuffle a bracket while still preserving the projected
 placement of each participant at the end of the tournament. This helps
 randomize tournaments while still keeping things balanced.
 
-Example usages:
+### Examples
 
 ```
 $ python shuffle_seeds.py 9
@@ -31,3 +31,20 @@ Returns the newly shuffled order of participants from a list of participant name
 Participants should be ordered from 1st seed to last seed. Leading and trailing
 spaces in the participant names are stripped.
 
+# Challonge Credentials Config
+
+`parse_challonge_config.py`: Developer tool for getting Challonge credentials
+from a config file.
+
+The Challonge API key is something you want to keep secret. I set up this tool
+so you can easily parse your Challonge info from a config file that can be
+ignored from your git repo instead of hardcoding it into your code.
+
+### Examples
+
+See challonge.ini for an example config file with instructions.
+
+```
+$ python parse_challonge_config.py my_challonge.ini
+{ user: 'blah', api_key: 'not telling' }
+```
