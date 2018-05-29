@@ -92,7 +92,7 @@ Example sessions with this tool:
 1. [Approved creating an amateur bracket](https://pastebin.com/LTfCKFWr)
 2. [Rejecting the amateur bracket instead](https://pastebin.com/qDvP8Ayz)
 3. [The tool won't damage anything that already
-   exists](https://pastebin.com/FiEb4ejS).
+   exists](https://pastebin.com/FiEb4ejS)
 4. [The tool lets you know if you're creating the amateur bracket
    too early](https://pastebin.com/AazXDi84)
 
