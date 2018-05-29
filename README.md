@@ -7,12 +7,32 @@ for Super Smash Bros. Melee).
 All examples are assumed to be run from a downloaded version of this
 repository.
 
-# Running Scripts
+# Get Started
+
+These scripts are currently written in
+[Python 2](https://www.python.org/downloads/), and are incompatible
+with Python 3. I'll upgrade them soon, I promise.
+
+1. Clone and enter the repository.
 
 ```
-git clone https://github.com/akbiggs/challonge-tools
-cd challonge-tools
-python <script_to_run>
+$ git clone https://github.com/akbiggs/challonge-tools
+$ cd challonge-tools
+```
+
+2. Install python dependencies.
+
+```
+$ pip install --user -r requirements.txt
+```
+
+3. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
+   with your Challonge username and [API key](https://challonge.com/settings/developer).
+
+4. Run the script you want to try!
+
+```
+$ python <script_to_run>.py
 ```
 
 # Shuffle Seeds
@@ -53,18 +73,11 @@ hosts a separate tournament for them after the main tournament. This helps
 people get more practice and have more fun, especially in a game with a
 soul-crushing learning curve like Melee.
 
-### Prerequisites
-
-1. Install pychallonge dependencies: `pip install iso8601 # required 
-   for pychallonge`
-2. Install pychallonge locally: `pip install -e 
-   git+http://github.com/russ-/pychallonge#egg=pychallonge --user` 
-3. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
-   with your Challonge username and [API key](https://challonge.com/settings/developer).
-
 ### Examples
 
-`$ python create_amateur_bracket.py mtvmelee72`
+```
+$ python create_amateur_bracket.py mtvmelee72
+```
 
 Examines [http://challonge.com/mtvmelee72](http://challonge.com/mtvmelee72)
 and offers to create an amateur bracket using the people eliminated in
