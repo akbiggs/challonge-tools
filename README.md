@@ -37,11 +37,35 @@ $ python <script_to_run>.py
 
 # Shuffle Seeds
 
-`shuffle_seeds.py`: Utilities for shuffling seeds in a tournament.
+`shuffle_seeds_challonge.py`: Shuffles seeds in a Challonge tournament.
 
 These functions help you shuffle a bracket while still preserving the projected
 placement of each participant at the end of the tournament. This helps
-randomize tournaments while still keeping things balanced.
+randomize tournaments while still keeping things balanced, compared to
+Challonge's "shuffle seeds", which just randomizes everything.
+
+### Example
+
+```
+$ python shuffle_seeds_challonge.py zcmvlkxm
+Seeds shuffled: http://challonge.com/zcmvlkxm/participants
+```
+
+Automatically updates the seeding of all participants based on a generated
+shuffle order.
+
+**Flags:**
+
+* `--config_file=challonge.ini`: The config file to read your Challonge
+  credentials from. This is useful to reduce the risk of accidentally
+  committing your credentials to source control.
+
+# Shuffle Seeds (without Challonge)
+
+`shuffle_seeds.py`: Shuffles seeds without using the Challonge API.
+
+This is useful when you don't have access to an internet connection, or
+when you just want to test out the randomization.
 
 ### Examples
 
@@ -112,9 +136,9 @@ Example sessions with this tool:
   useful to help them track all the tournaments they've entered, but it also
   makes the amateur bracket send an email to them, so use responsibly when
   generating amateur brackets. The tool will let you know if their account
-  will be emailed.
+  will be emailed. Default: `True`
 * `--config_file="challonge.ini"`: The config file to read your Challonge
-  API key and username from. Needs to be edited before running Default: `"challonge.ini"`
+  API key and username from. Default: `"challonge.ini"`
 
 e.g.
 
