@@ -69,6 +69,8 @@ data.
 Here's an example session where I
 [approved creating the amateur bracket](https://pastebin.com/LTfCKFWr), and
 here's a session where I [rejected creating it](https://pastebin.com/qDvP8Ayz).
+If I try to create an amateur bracket that already exists, [the script doesn't
+do anything](https://pastebin.com/FiEb4ejS).
 
 **Flags:**
 
