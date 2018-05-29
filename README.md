@@ -70,9 +70,9 @@ Examines [http://challonge.com/mtvmelee72](http://challonge.com/mtvmelee72)
 and offers to create an amateur bracket using the people eliminated in
 Loser's Rounds 1 and 2.
 
-The tool will get your approval before it creates anything, and it won't do anything
-if an amateur bracket already exists. It won't overwrite your tournament's
-data.
+The tool will get your approval before it creates anything, and it won't do
+anything if an amateur bracket already exists. It won't modify your existing
+tournament's data.
 
 Here's an example session where I
 [approved creating the amateur bracket](https://pastebin.com/LTfCKFWr), and
