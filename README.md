@@ -35,7 +35,7 @@ $ pip install --user -r requirements.txt
 $ python <script_to_run>.py
 ```
 
-# Shuffle Seeds
+# Shuffle Seeds (with Challonge)
 
 `shuffle_seeds_challonge.py`: Shuffles seeds in a Challonge tournament.
 
