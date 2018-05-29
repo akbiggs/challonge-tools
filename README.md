@@ -4,6 +4,9 @@ Contains various utility scripts that I use to make running
 [Challonge](http://challonge.com) tournaments easier (specifically
 for Super Smash Bros. Melee).
 
+All examples are assumed to be run from a downloaded version of this
+repository.
+
 # Shuffle Seeds
 
 `shuffle_seeds.py`: Utilities for shuffling seeds in a tournament.
@@ -44,9 +47,10 @@ soul-crushing learning curve like Melee.
 
 Prerequisites:
 
-1. `pip install iso8601 # required for pychallonge`
-2. `pip install -e git+http://github.com/russ-/pychallonge#egg=pychallonge
-   --user` 
+1. Install pychallonge dependencies: `pip install iso8601 # required 
+   for pychallonge`
+2. Install pychallonge locally: `pip install -e 
+   git+http://github.com/russ-/pychallonge#egg=pychallonge --user` 
 3. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
    with your Challonge username and [API key](https://challonge.com/settings/developer).
 
