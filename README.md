@@ -87,11 +87,14 @@ The tool will get your approval before it creates anything, and it won't do
 anything if an amateur bracket already exists. It won't modify your existing
 tournament's data.
 
-Here's an example session where I
-[approved creating the amateur bracket](https://pastebin.com/LTfCKFWr), and
-here's a session where I [rejected creating it](https://pastebin.com/qDvP8Ayz).
-If I try to create an amateur bracket that already exists, [the script doesn't
-do anything](https://pastebin.com/FiEb4ejS).
+Example sessions with this tool:
+
+1. [Approved creating an amateur bracket](https://pastebin.com/LTfCKFWr)
+2. [Rejecting the amateur bracket instead](https://pastebin.com/qDvP8Ayz)
+3. [The tool won't damage anything that already
+   exists](https://pastebin.com/FiEb4ejS).
+4. [The tool lets you know if you're creating the amateur bracket
+   too early](https://pastebin.com/AazXDi84)
 
 **Flags:**
 
