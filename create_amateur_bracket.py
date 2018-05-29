@@ -158,6 +158,8 @@ if __name__ == "__main__":
   initialized = _set_challonge_credentials_from_config(args.config_file)
   if not initialized:
     sys.stderr.write("Could not initialize Challonge API.\n")
+    sys.stderr.write("Have you filled in the 'user' and 'api_key' values in "
+                     "{0}?\n".format(args.config_file))
     sys.exit(1)
 
   # Create the info for our amateur's bracket.

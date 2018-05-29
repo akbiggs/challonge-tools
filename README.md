@@ -1,7 +1,8 @@
 # Challonge Tools
 
-Contains various utility scripts that I use to make running Melee tournaments
-easier.
+Contains various utility scripts that I use to make running
+[Challonge](http://challonge.com) tournaments easier (specifically
+for Super Smash Bros. Melee).
 
 # Shuffle Seeds
 
@@ -30,6 +31,54 @@ $ python shuffle_seeds.py "Neal, Bryan, Paragon, gaR, Admiral Lightning Bolt, Ed
 Returns the newly shuffled order of participants from a list of participant names.
 Participants should be ordered from 1st seed to last seed. Leading and trailing
 spaces in the participant names are stripped.
+
+# Amateur Bracket Creator
+
+`create_amateur_bracket.py`: Creates an amateur tournament automatically from
+an existing Challonge tournament.
+
+An amateur tournament takes people who place below a certain threshold and
+hosts a separate tournament for them after the main tournament. This helps
+people get more practice and have more fun, especially in a game with a
+soul-crushing learning curve like Melee.
+
+Prerequisites:
+
+1. `pip install iso8601 # required for pychallonge`
+2. `pip install -e git+http://github.com/russ-/pychallonge#egg=pychallonge
+   --user` 
+3. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
+   with your Challonge username and [API key](https://challonge.com/settings/developer).
+
+### Examples
+
+`$ python create_amateur_bracket.py mtvmelee72`
+
+Examines [http://challonge.com/mtvmelee72](http://challonge.com/mtvmelee72)
+and offers to create an amateur bracket using the people eliminated in
+Loser's Rounds 1 and 2.
+
+**Flags:**
+
+* `--use_double_elimination=True`: Whether the amateur bracket should use
+  double-elimination or single-elimination. Default: `True`
+* `--randomize_seeds=False`: Whether the amateur bracket should completely
+  randomize the seeds or use the seeding from the main bracket to figure
+  them out. Default: `False`
+* `--losers_round_cutoff=2`: The loser's round after which people who
+  are eliminated no longer qualify for the amateur bracket. A value of
+  2 means that Loser's Rounds 1 and 2 are included, but not Loser's Round 3.
+  Default: `2`
+* `--config_file="challonge.ini"`: The config file to read your Challonge
+  API key and username from. Needs to be edited before running Default: `"challonge.ini"`
+
+e.g.
+
+```
+$ python create_amateur_bracket.py mtvmelee72 \
+      --config_file=akbiggs_challonge.ini \
+      --use_double_elimination=False \
+```
 
 # Challonge Credentials Config
 

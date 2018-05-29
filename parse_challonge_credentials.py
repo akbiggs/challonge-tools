@@ -74,7 +74,7 @@ def safe_parse_challonge_credentials_from_config(config_filename):
     sys.stderr.write("Failed to read credentials from {0}: {1}.\n".format(
         config_filename, err))
     sys.stderr.write(
-        "Check {0} for instructions on how to setup your config.".format(
+        "Check {0} for instructions on how to setup your config.\n".format(
         defaults.DEFAULT_CONFIG_FILENAME))
     return None
 
