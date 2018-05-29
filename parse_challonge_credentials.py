@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 
-"""TODO
+"""Tool for parsing Challonge credentials from a config file.
+
+The Challonge API key is something you want to keep secret. I set up this tool
+so you can easily parse your Challonge info from a config file that can be
+ignored from your git repo instead of hardcoding it into your code.
+
+Example:
+
+  python parse_challonge_config.py my_challonge.ini
+    => { user: 'blah', api_key: 'not telling' }
+
 """
 
 
-import challonge
 import ConfigParser
 import sys
 
-
-# Name of the default config file.
-_DEFAULT_CONFIG_FILENAME = "credentials.ini"
+import defaults
 
 
 # Section in the config file with challonge credential info.
@@ -19,7 +26,7 @@ _CHALLONGE_CONFIG_USER_OPTION = "user"
 _CHALLONGE_CONFIG_API_KEY_OPTION = "api_key"
 
 
-def _parse_challonge_credentials_from_config_file(config_filename):
+def parse_challonge_credentials_from_config(config_filename):
   """Parses Challonge credentials from a config file.
   
   Args:
@@ -48,6 +55,29 @@ def _parse_challonge_credentials_from_config_file(config_filename):
   
   return {"user": user, "api_key": api_key}
 
+def safe_parse_challonge_credentials_from_config(config_filename):
+  """Parses Challonge credentials from a config file with error handling.
+
+  Config parsing errors will be caught and logged to stderr.
+
+  Args:
+    config_filenae: The filename of the config file to parse.
+  
+  Returns:
+    A dictionary with {"user", "api_key"} keys parsed from the config file,
+    or None if the credentials could not be parsed.
+  """
+  try:
+    return parse_challonge_credentials_from_config(
+        config_filename)
+  except ConfigParser.Error as err:
+    sys.stderr.write("Failed to read credentials from {0}: {1}.\n".format(
+        config_filename, err))
+    sys.stderr.write(
+        "Check {0} for instructions on how to setup your config.".format(
+        defaults.DEFAULT_CONFIG_FILENAME))
+    return None
+
 
 if __name__ == "__main__":
   if len(sys.argv) > 2:
@@ -57,18 +87,11 @@ if __name__ == "__main__":
   if len(sys.argv) == 2:
     config_filename = sys.argv[1]
   else:
-    config_filename = _DEFAULT_CONFIG_FILENAME
-  
-  try:
-    credentials = _parse_challonge_credentials_from_config_file(
-        config_filename)
-  except ConfigParser.Error as err:
-    sys.stderr.write("Failed to read credentials from {0}: {1}.\n".format(
-        config_filename, err))
-    sys.stderr.write(
-        "Check {0} for instructions on how to setup your config.".format(
-        _DEFAULT_CONFIG_FILENAME))
-    sys.exit(1)
+    config_filename = defaults.DEFAULT_CONFIG_FILENAME
 
-  print credentials
+  credentials = safe_parse_challonge_credentials_from_config(config_filename)
+  if not credentials:
+    sys.exit(1)
+  else:
+    print credentials
 
