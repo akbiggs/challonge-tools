@@ -24,11 +24,12 @@ Participants should be ordered from 1st seed to last seed. Leading and trailing
 spaces in the participant names are stripped.
 """
 
-
+import challonge
 import numbers
 import random
 import sys
 
+import util
 
 def _get_num_participants_in_first_round(num_participants):
   """Gets the number of people in the first round of a tourney.
@@ -42,8 +43,8 @@ def _get_num_participants_in_first_round(num_participants):
   """
   if num_participants <= 0:
     raise ValueError("Invalid number of participants for a tourney.")
-  if num_participants == 1:
-    return 1
+  if num_participants <= 2:
+    return num_participants
 
   # If the bracket size is a power of two, everybody gets to play in
   # the first round.
@@ -74,6 +75,15 @@ def get_num_participants_placing_last(num_participants,
   Raises:
     ValueError: if num_participants <= 0.
   """
+  if num_participants == 1:
+    return 1
+
+  # <= 4 is a bit of a weird case, so we handle it specially.
+  # TODO: reason through what's making the bucket size zero for the value 4,
+  # too tired ATM
+  if num_participants <= 4:
+    return 1 if double_elimination else 2
+
   num_in_first_round = _get_num_participants_in_first_round(
       num_participants)
   num_losing_in_first_round = num_in_first_round / 2
@@ -93,6 +103,7 @@ def get_num_participants_placing_last(num_participants,
       num_losing_in_first_round + num_losing_in_second_winners_round)
   num_losing_in_first_losers_round = num_in_first_losers_round / 2
   return num_losing_in_first_losers_round
+
 
 def _get_bucket_sizes(num_participants):
   """Get the size of buckets in which seeds can be randomized.
@@ -142,33 +153,6 @@ def _get_buckets(num_participants):
     last_seed_in_bucket = top_seed_in_bucket - 1 
 
 
-def _shuffle(values):
-  """Returns the list of values shuffled.
-  
-  This is different from random.shuffle because it returns a new list
-  instead of operating in-place.
-
-  Args:
-    values: A list of arbitrary values.
-
-  Returns:
-    The values shuffled into a random order.
-  """
-  return random.sample(values, len(values))
-
-
-def _flatten(lists):
-  """Flattens a list of lists into a single list of values.
-  
-  Args:
-    lists: A list of lists.
-  
-  Returns:
-    The list flattened into a single list, with the same order of values.
-  """
-  return [x for sublist in lists for x in sublist]
-
-
 def get_shuffled_seeds(num_participants):
   """Get randomized seedings for a tournament with num_participants.
 
@@ -184,11 +168,11 @@ def get_shuffled_seeds(num_participants):
     A list of seeds to use for the tournament. For a given seed X, the value
     at index X - 1 is their randomized seed to use for the tournament.
   """
-  shuffled_buckets = [_shuffle(x) for x in _get_buckets(num_participants)]
+  shuffled_buckets = [util.shuffle(x) for x in _get_buckets(num_participants)]
 
   # Buckets are ordered from last place to first place, so we need to reverse
   # them to get the seeds ordered from first to last.
-  return _flatten(reversed(shuffled_buckets))
+  return util.flatten(reversed(shuffled_buckets))
 
 
 if __name__ == "__main__":

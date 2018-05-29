@@ -54,9 +54,9 @@ import urllib2
 import defaults
 import puns
 import util
+import util_challonge
 
 # Local from imports.
-from parse_challonge_credentials import safe_parse_challonge_credentials_from_config
 from shuffle_seeds import get_num_participants_placing_last
 
 
@@ -68,24 +68,6 @@ _PARAMS_NAME = "name"
 # Credentials keys.
 _CREDENTIALS_USER = "user"
 _CREDENTIALS_API_KEY = "api_key"
-
-
-def _set_challonge_credentials_from_config(config_filename):
-  """Sets up your Challonge API credentials from info in a config file.
-
-  Args:
-    config_filename: The filename of the config file to read your credentials
-                     from.
-  Returns:
-    True if the credentials were set successfully, False otherwise.
-  """
-  credentials = safe_parse_challonge_credentials_from_config(config_filename)
-  if not credentials:
-    return False
-
-  challonge.set_credentials(credentials[_CREDENTIALS_USER],
-                            credentials[_CREDENTIALS_API_KEY])
-  return True
 
 
 def _get_participant_name(participant_info):
@@ -179,13 +161,11 @@ def _get_num_amateurs(num_participants, cutoff):
   return num_amateurs
 
 
-
 # TODO: This main function is a mess, and totally won't make your life
 # easy if you want to make a GUI out of this in the future. Clean up your act.
 if __name__ == "__main__":
   argparser = argparse.ArgumentParser(description="Create amateur brackets.")
   argparser.add_argument("tourney_name",
-                         type=str,
                          help="the name of the tourney to create an amateur "
                               "bracket for")
   argparser.add_argument("--losers_round_cutoff",
@@ -215,16 +195,13 @@ if __name__ == "__main__":
 
   # We need to initialize our Challonge credentials before we can
   # make any API calls.
-  initialized = _set_challonge_credentials_from_config(args.config_file)
+  initialized = util_challonge.set_challonge_credentials_from_config(
+      args.config_file)
   if not initialized:
-    sys.stderr.write("Could not initialize Challonge API.\n")
-    sys.stderr.write("Have you filled in the '{0}' and '{1}' values in "
-                     "{2}?\n".format(_CREDENTIALS_USER, _CREDENTIALS_API_KEY,
-                                     args.config_file))
     sys.exit(1)
 
   # Create the info for our amateur's bracket.
-  tourney_name = args.tourney_name.split("http://challonge.com/")[0]
+  tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
   tourney_info = challonge.tournaments.show(tourney_name)
   tourney_title = tourney_info["name"]
   amateur_tourney_title = tourney_title + " Amateur's Bracket"

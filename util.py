@@ -5,6 +5,34 @@
 
 
 import argparse
+import random
+
+
+def shuffle(values):
+  """Returns the list of values shuffled.
+  
+  This is different from random.shuffle because it returns a new list
+  instead of operating in-place.
+
+  Args:
+    values: A list of arbitrary values.
+
+  Returns:
+    The values shuffled into a random order.
+  """
+  return random.sample(values, len(values))
+
+
+def flatten(lists):
+  """Flattens a list of lists into a single list of values.
+  
+  Args:
+    lists: A list of lists.
+  
+  Returns:
+    The list flattened into a single list, with the same order of values.
+  """
+  return [x for sublist in lists for x in sublist]
 
 
 def str_to_bool(s):
