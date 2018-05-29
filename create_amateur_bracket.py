@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 """Creates an amateur tournament from an existing Challonge tournament.
 
 An amateur tournament takes people who place below a certain threshold and
@@ -41,14 +42,31 @@ useful for hiding your credentials from version control. See "challonge.ini"
 for an example config file with instructions.
 """
 
+
+# Global python & package imports.
 import argparse
 import challonge
 import random
 import sys
 import urllib2
 
+# Local imports.
 import defaults
+import puns
+
+# Local from imports.
 from parse_challonge_credentials import safe_parse_challonge_credentials_from_config
+from shuffle_seeds import get_num_participants_placing_last
+
+
+# Participant param names for requests.
+_PARAMS_CHALLONGE_USERNAME = "challonge_username"
+_PARAMS_SEED = "seed"
+_PARAMS_NAME = "name"
+
+# Credentials keys.
+_CREDENTIALS_USER = "user"
+_CREDENTIALS_API_KEY = "api_key"
 
 
 def _set_challonge_credentials_from_config(config_filename):
@@ -64,12 +82,60 @@ def _set_challonge_credentials_from_config(config_filename):
   if not credentials:
     return False
 
-  challonge.set_credentials(credentials["user"], credentials["api_key"])
+  challonge.set_credentials(credentials[_CREDENTIALS_USER],
+                            credentials[_CREDENTIALS_API_KEY])
   return True
 
 
-def _get_matches_determining_amateurs(matches, cutoff):
-  """Filters the matches that determine who qualifies for amateur's bracket.
+def _get_participant_name(participant_info):
+  """Gets the name to use for a participant on Challonge.
+
+  Args:
+    participant_info: A Challonge participant model from the server.
+
+  Returns:
+    A string representing the name of the participant, or None if we
+    couldn't figure out their name.
+  """
+  # I got bitten by using "name" instead of "display-name" (there
+  # are some weird invitation-based cases where "name" is invalid),
+  # so I made this function to help me remember.
+  return participant_info["display-name"]
+
+
+def _get_params_to_create_participant(participant_info,
+                                      associate_challonge_account, seed):
+  """Gets the params used to register a participant in a new tourney.
+
+  Args:
+    participant_info: Existing info on that participant grabbed from another
+                      tourney.
+    associate_challonge_account: Whether their Challonge account should be
+                                 associated with their new registration. This
+                                 will send them an email inviting them to the
+                                 tourney.
+    seed: The seed to give the participant.
+
+  Returns:
+    A dictionary that can be passed as params to challonge.participant.create
+    to add the participant into a tourney.
+  """
+  params = {}
+  params[_PARAMS_SEED] = seed
+  params[_PARAMS_NAME] = _get_participant_name(participant_info)
+
+  # Using a dash in 'challonge-username' instead of using
+  # _PARAMS_CHALLONGE_USERNAME is intentional: dashes are used in
+  # server responses while underscores are used in server requests (argh!!!)
+  challonge_username = participant_info.get("challonge-username")
+  if associate_challonge_account and challonge_username:
+    params[_PARAMS_CHALLONGE_USERNAME] = challonge_username
+
+  return params
+
+
+def _get_losers_matches_determining_amateurs(matches, cutoff):
+  """Filters existing matches that determine who qualifies for amateur's.
 
   Args:
     matches: A list of Challonge matches retrieved from the Challonge API.
@@ -86,6 +152,30 @@ def _get_matches_determining_amateurs(matches, cutoff):
   cutoff = args.losers_round_cutoff
   return [
       x for x in matches if -cutoff <= x["round"] and x["round"] <= -1]
+
+
+def _get_num_amateurs(num_participants, cutoff):
+  """Figures out how many participants will be considered amateurs.
+
+  Args:
+    num_participants: The number of participants in the tournament.
+    cutoff: The loser's round after which people are no longer qualified for
+            amateur's bracket.
+
+  Returns:
+    The number of participants who will be classified as amateurs.
+  """
+  # Keep eliminating a loser's round worth of people until we've reached our
+  # cutoff round. The number of eliminated people at that point is the number
+  # of amateurs.
+  num_amateurs = 0
+  for losers_round in xrange(0, cutoff):
+    num_eliminated = get_num_participants_placing_last(num_participants)
+
+    num_amateurs = num_amateurs + num_eliminated
+    num_participants = num_participants - num_eliminated
+
+  return num_amateurs
 
 
 def _str_to_bool(s):
@@ -151,6 +241,12 @@ if __name__ == "__main__":
                          help="whether the seeds should be randomized in the "
                               "amateur bracket. If this is off, the same "
                               "seeds from the main bracket will be used")
+  argparser.add_argument("--associate_challonge_accounts", type=_str_to_bool,
+                         default=True,
+                         help="whether challonge accounts should be "
+                              "associated with the amateur bracket entrants. "
+                              "This will invite their Challonge account to "
+                              "the tourney via email, so use responsibly.")
   args = argparser.parse_args()
 
   # We need to initialize our Challonge credentials before we can
@@ -158,15 +254,17 @@ if __name__ == "__main__":
   initialized = _set_challonge_credentials_from_config(args.config_file)
   if not initialized:
     sys.stderr.write("Could not initialize Challonge API.\n")
-    sys.stderr.write("Have you filled in the 'user' and 'api_key' values in "
-                     "{0}?\n".format(args.config_file))
+    sys.stderr.write("Have you filled in the '{0}' and '{1}' values in "
+                     "{2}?\n".format(_CREDENTIALS_USER, _CREDENTIALS_API_KEY,
+                                     args.config_file))
     sys.exit(1)
 
   # Create the info for our amateur's bracket.
   tourney_name = args.tourney_name.split("http://challonge.com/")[0]
-  tourney_title = challonge.tournaments.show(args.tourney_name)["name"]
+  tourney_info = challonge.tournaments.show(tourney_name)
+  tourney_title = tourney_info["name"]
   amateur_tourney_title = tourney_title + " Amateur's Bracket"
-  amateur_tourney_name = args.tourney_name + "_amateur"
+  amateur_tourney_name = tourney_name + "_amateur"
   amateur_tourney_url = "http://challonge.com/{0}".format(
       amateur_tourney_name)
   if args.use_double_elimination:
@@ -194,51 +292,74 @@ if __name__ == "__main__":
                      "{0}.\n".format(amateur_tourney_url))
     sys.exit(1)
 
-  # Get all loser's matches until the cutoff, and verify that they're
-  # complete so we have enough info to create the amateur's bracket.
+  # Get all decided loser's matches until the cutoff.
   cutoff = args.losers_round_cutoff
-  matches = challonge.matches.index(args.tourney_name)
-  amateur_deciding_matches = _get_matches_determining_amateurs(matches, cutoff)
-  if any(x["state"] != "complete" for x in amateur_deciding_matches):
-    sys.stderr.write("There are still matches underway before loser's "
-                     "round {0}. Please wait for these matches to complete "
-                     "before creating the amateur bracket. The loser's "
-                     "round to cutoff for amateur's can be configured using "
-                     "the --losers_round_cutoff flag.\n".format(cutoff + 1))
+  matches = challonge.matches.index(tourney_name)
+  amateur_deciding_matches = _get_losers_matches_determining_amateurs(
+      matches, cutoff)
+  num_completed_deciding_matches = sum(
+      1 for x in amateur_deciding_matches if x["state"] == "complete")
+  num_amateurs = _get_num_amateurs(tourney_info["participants-count"], cutoff)
+
+  # If they're not all complete, we don't have enough info to create the
+  # amateur bracket.
+  if num_completed_deciding_matches != num_amateurs:
+    sys.stderr.write(
+        "There are still {0} matches incomplete before loser's round {1}.\n"
+        "Please wait for these matches to complete before creating the\n"
+        "amateur bracket.\n"
+        "The last loser's round for amateur's qualification can be\n"
+        "configured using the --losers_round_cutoff flag.\n".format(
+            num_amateurs - num_completed_deciding_matches,
+            cutoff + 1))
     sys.exit(1)
 
   # Gather up all the amateurs.
   amateur_ids = [match["loser-id"] for match in amateur_deciding_matches]
   amateur_infos = (
-      challonge.participants.show(args.tourney_name, x) for x in amateur_ids)
+      challonge.participants.show(tourney_name, x) for x in amateur_ids)
 
   # Sort them based on seeding.
   if args.randomize_seeds:
-    sort_fn = lambda x: random.random()
+    seed_fn = lambda x: random.random()
   else:
-    sort_fn = lambda x: x["seed"]
-  amateur_infos = sorted(amateur_infos, key=sort_fn)
+    seed_fn = lambda x: x[_PARAMS_SEED]
+  amateur_infos = sorted(amateur_infos, key=seed_fn)
+
+  all_amateur_params = [
+      _get_params_to_create_participant(
+          amateur_info,
+          associate_challonge_account = args.associate_challonge_accounts,
+          seed = (i + 1))
+      for i, amateur_info in enumerate(amateur_infos)]
 
   # Confirm with the user that this is all okay.
   print "I creeped your tourney at http://challonge.com/{0}...".format(
-      args.tourney_name)
+      tourney_name)
   print ("Here's what I think the amateur bracket should look like, taking\n"
          "all people eliminated before Loser's Round {1}:".format(
-             args.tourney_name, cutoff + 1))
+             tourney_name, cutoff + 1))
   print
   print "Title: {0}".format(amateur_tourney_title)
   print "URL: {0}".format(amateur_tourney_url)
   print "Elimination Type: {0}".format(amateur_tourney_type)
   print
   print "Seeds:"
-  for i, amateur_info in enumerate(amateur_infos):
-    print "\t{0}. {1}".format(i + 1, amateur_info["name"])
+  need_to_send_at_least_one_email = any(
+      x.get(_PARAMS_CHALLONGE_USERNAME) for x in all_amateur_params)
+  if need_to_send_at_least_one_email:
+    # I really don't want people accidentally sending email invites, so
+    # we're very explicit about email invites and how to turn them off.
+    print ("(to disable invites, use --associate_challonge_accounts=False)")
+  for amateur_params in all_amateur_params:
+    print "\t{0}. {1}".format(amateur_params[_PARAMS_SEED], 
+                              amateur_params[_PARAMS_NAME])
+    if amateur_params.get(_PARAMS_CHALLONGE_USERNAME):
+      print "\t\t- Challonge account will receive email invite."
   print
-  confirmed = _prompt_yes_no("Is it okay to create this amateur's bracket?")
-
-  if not confirmed:
+  if not _prompt_yes_no("Is it okay to create this amateur's bracket?"):
     print "Aw man. Alright, I'm not creating this amateur's bracket."
-    print "Talk about an amateur move..."
+    print random.choice(puns.AMATEUR_PUNS)
     print ("( Feel free to report bugs and request features at "
            "https://github.com/akbiggs/challonge-tools/issues )")
     sys.exit(1)
@@ -246,9 +367,9 @@ if __name__ == "__main__":
   # We've got confirmation. Go ahead and create the amateur bracket.
   challonge.tournaments.create(amateur_tourney_title, amateur_tourney_name,
                                amateur_tourney_type)
-  for i, amateur_info in enumerate(amateur_infos):
-    challonge.participants.create(amateur_tourney_name, amateur_info["name"],
-                                  seed=(i + 1))
+  for amateur_params in all_amateur_params:
+    challonge.participants.create(amateur_tourney_name, **amateur_params)
 
   print "Created {0} at {1}.".format(amateur_tourney_title,
                                      amateur_tourney_url)
+  print "Start the amateur bracket at the above URL when you're ready!"

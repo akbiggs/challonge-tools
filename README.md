@@ -83,6 +83,12 @@ do anything](https://pastebin.com/FiEb4ejS).
   are eliminated no longer qualify for the amateur bracket. A value of
   2 means that Loser's Rounds 1 and 2 are included, but not Loser's Round 3.
   Default: `2`
+* `--associate_challonge_accounts=True`: Whether the users' Challonge accounts
+  should be associated with their entries in the amateur brackets. This is
+  useful to help them track all the tournaments they've entered, but it also
+  makes the amateur bracket send an email to them, so use responsibly when
+  generating amateur brackets. The tool will let you know if their account
+  will be emailed.
 * `--config_file="challonge.ini"`: The config file to read your Challonge
   API key and username from. Needs to be edited before running Default: `"challonge.ini"`
 

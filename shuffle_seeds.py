@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 """Utilities for shuffling seeds in a tournament.
 
 These functions help you shuffle a bracket while still preserving the projected
@@ -23,12 +24,15 @@ Participants should be ordered from 1st seed to last seed. Leading and trailing
 spaces in the participant names are stripped.
 """
 
+
 import numbers
 import random
 import sys
 
 
-def _get_num_participants_placing_last(num_participants):
+# TODO: We use this method for non-shuffling related things. Either rename
+# this module or move this method into a separate one.
+def get_num_participants_placing_last(num_participants):
   """Gets the number of people who place last in a tourney of num_participants.
  
   Args:
@@ -89,7 +93,7 @@ def _get_bucket_sizes(num_participants):
   # by solving for a tournament without the eliminated people. This approach
   # can be applied repeatedly to figure out all the buckets.
   while num_participants > 0:
-    bucket_size = _get_num_participants_placing_last(num_participants)
+    bucket_size = get_num_participants_placing_last(num_participants)
     yield bucket_size
    
     num_participants = num_participants - bucket_size
