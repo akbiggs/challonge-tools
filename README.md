@@ -7,6 +7,14 @@ for Super Smash Bros. Melee).
 All examples are assumed to be run from a downloaded version of this
 repository.
 
+# Running Scripts
+
+```
+git clone https://github.com/akbiggs/challonge-tools
+cd challonge-tools
+python <script_to_run>
+```
+
 # Shuffle Seeds
 
 `shuffle_seeds.py`: Utilities for shuffling seeds in a tournament.
@@ -45,7 +53,7 @@ hosts a separate tournament for them after the main tournament. This helps
 people get more practice and have more fun, especially in a game with a
 soul-crushing learning curve like Melee.
 
-Prerequisites:
+### Prerequisites
 
 1. Install pychallonge dependencies: `pip install iso8601 # required 
    for pychallonge`
