@@ -1,0 +1,2 @@
+iso8601==0.1.11
+-e git+http://github.com/russ-/pychallonge@bc202d7140cb08d11d345564f721c2f57129b84f#egg=pychallonge
