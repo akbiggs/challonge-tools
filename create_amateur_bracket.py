@@ -53,6 +53,7 @@ import urllib2
 # Local imports.
 import defaults
 import puns
+import util
 
 # Local from imports.
 from parse_challonge_credentials import safe_parse_challonge_credentials_from_config
@@ -178,71 +179,34 @@ def _get_num_amateurs(num_participants, cutoff):
   return num_amateurs
 
 
-def _str_to_bool(s):
-  """Converts a string value to a boolean value.
 
-  Args:
-    s: The string to convert to a boolean value.
-
-  Raises:
-    argparse.ArgumentTypeError: If the string doesn't correspond to a bool.
-
-  Returns:
-    The corresponding boolean value for the string.
-  """
-  if s.lower() in ('yes', 'true', 't', 'y', '1'):
-    return True
-  elif s.lower() in ('no', 'false', 'f', 'n', '0'):
-    return False
-  else:
-    raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-def _prompt_yes_no(prompt):
-  """Prompts the user to respond yes/no to a question.
-  
-  Asks repeatedly until valid input is given.
-
-  Args:
-    prompt: The prompt to use. This should not include "[y/n]".
-
-  Returns:
-    True if the user answered yes, False if they answered yes.
-  """
-  while True:
-    print (prompt + " [y/n]"),
-
-    choice = raw_input().lower()
-    try:
-      return _str_to_bool(choice)
-    except argparse.ArgumentTypeError:
-      print "Invalid response. Please say 'y' or 'n'."
-
-
+# TODO: This main function is a mess, and totally won't make your life
+# easy if you want to make a GUI out of this in the future. Clean up your act.
 if __name__ == "__main__":
   argparser = argparse.ArgumentParser(description="Create amateur brackets.")
-  argparser.add_argument("tourney_name", type=str,
+  argparser.add_argument("tourney_name",
+                         type=str,
                          help="the name of the tourney to create an amateur "
                               "bracket for")
-  argparser.add_argument("--losers_round_cutoff", type=int,
-                         default=2,
+  argparser.add_argument("--losers_round_cutoff",
+                         type=int, default=2,
                          help="the loser's round after which people are no "
                               "longer qualified for amateur bracket")
-  argparser.add_argument("--use_double_elimination", type=_str_to_bool,
-                         default=True,
+  argparser.add_argument("--use_double_elimination",
+                         type=util.str_to_bool, default=True,
                          help="whether the amateur bracket should use double "
                               "elimination or single elimination")
   argparser.add_argument("--config_file",
                          default=defaults.DEFAULT_CONFIG_FILENAME,
                          help="the config file to read your Challonge "
                               "credentials from")
-  argparser.add_argument("--randomize_seeds", type=_str_to_bool,
-                         default=False,
+  argparser.add_argument("--randomize_seeds",
+                         type=util.str_to_bool, default=False,
                          help="whether the seeds should be randomized in the "
                               "amateur bracket. If this is off, the same "
                               "seeds from the main bracket will be used")
-  argparser.add_argument("--associate_challonge_accounts", type=_str_to_bool,
-                         default=True,
+  argparser.add_argument("--associate_challonge_accounts",
+                         type=util.str_to_bool, default=True,
                          help="whether challonge accounts should be "
                               "associated with the amateur bracket entrants. "
                               "This will invite their Challonge account to "
@@ -357,7 +321,7 @@ if __name__ == "__main__":
     if amateur_params.get(_PARAMS_CHALLONGE_USERNAME):
       print "\t\t- Challonge account will receive email invite."
   print
-  if not _prompt_yes_no("Is it okay to create this amateur's bracket?"):
+  if not util.prompt_yes_no("Is it okay to create this amateur's bracket?"):
     print "Aw man. Alright, I'm not creating this amateur's bracket."
     print random.choice(puns.AMATEUR_PUNS)
     print ("( Feel free to report bugs and request features at "

@@ -1,5 +1,6 @@
-# Various puns to spite the user with when they decide against creating an
+# Various puns that smite the user if they decide against creating an
 # amateur bracket.
+# Despite the variable name, I can assure you these puns are best-in-class.
 AMATEUR_PUNS = [
     'Talk about an amateur move...',
     'What is this, amateur hour?',

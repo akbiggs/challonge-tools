@@ -30,13 +30,43 @@ import random
 import sys
 
 
+def _get_num_participants_in_first_round(num_participants):
+  """Gets the number of people in the first round of a tourney.
+
+  Args:
+    num_participants: The number of total participants in the tourney.
+
+  Returns:
+    The number of people who will be playing in the tournament's first
+    round.
+  """
+  if num_participants <= 0:
+    raise ValueError("Invalid number of participants for a tourney.")
+  if num_participants == 1:
+    return 1
+
+  # If the bracket size is a power of two, everybody gets to play in
+  # the first round.
+  nearest_smaller_power_of_two = 2 ** (num_participants.bit_length() - 1)
+  if nearest_smaller_power_of_two == num_participants:
+    return num_participants
+
+  # Otherwise, we have an awkwardly-sized bracket.
+  # For each leftover participant, we match them up with a low seed from a
+  # nice power-of-two-sized bracket, with everyone else getting a bye.
+  num_leftover_participants = num_participants - nearest_smaller_power_of_two
+  return num_leftover_participants * 2
+
+
 # TODO: We use this method for non-shuffling related things. Either rename
-# this module or move this method into a separate one.
-def get_num_participants_placing_last(num_participants):
+# this module or move this method into a separate module.
+def get_num_participants_placing_last(num_participants,
+                                      double_elimination=True):
   """Gets the number of people who place last in a tourney of num_participants.
  
   Args:
     num_participants: The number of participants in the tourney.
+    double_elimination: Whether the tournament is double-elimination.
   
   Returns:
     The number of people who will place last in that tourney.
@@ -44,31 +74,25 @@ def get_num_participants_placing_last(num_participants):
   Raises:
     ValueError: if num_participants <= 0.
   """
-  if num_participants <= 0:
-    raise ValueError("Invalid number of participants for a tourney.")
-
-  # 1st to 4th place are unique.
-  if num_participants <= 4:
-    return 1
-
-  # If the bracket size is a power of two, half the participants will get
-  # knocked into loser's bracket from winner's, and then half of those
-  # participants will be eliminated in the loser's round.
-  nearest_smaller_power_of_two = 2 ** (num_participants.bit_length() - 1)
-  if nearest_smaller_power_of_two == num_participants:
-    return num_participants / 4
-
-  # If the bracket size isn't a power of two, we have an irregular bracket.
-  # For each leftover participant, we match them up with a low seed from the
-  # winner's bracket, with everyone else getting a bye. So this same number
-  # of leftover participants will get knocked into loser's.
-  # Then each of those people knocked into loser's gets matched up with someone
-  # knocked into loser's from the winner's round afterwards. So ultimately,
-  # the number of leftover participants will place last in an irregular
-  # bracket.
-  num_leftover_participants = num_participants - nearest_smaller_power_of_two
-  return num_leftover_participants
-
+  num_in_first_round = _get_num_participants_in_first_round(
+      num_participants)
+  num_losing_in_first_round = num_in_first_round / 2
+  if not double_elimination:
+    return num_losing_in_first_round
+  
+  # We just knocked a bunch of people into loser's. The second winner's round
+  # is always power-of-two-sized, where half the people will get knocked into
+  # round two of losers. These two groups of people are combined to form the
+  # initial loser's bracket. Half the people who fall into the first round of
+  # the loser's bracket will place last.
+  num_in_second_winners_round = (
+      num_participants - num_losing_in_first_round)
+  num_losing_in_second_winners_round = (
+      num_in_second_winners_round / 2)
+  num_in_first_losers_round = _get_num_participants_in_first_round(
+      num_losing_in_first_round + num_losing_in_second_winners_round)
+  num_losing_in_first_losers_round = num_in_first_losers_round / 2
+  return num_losing_in_first_losers_round
 
 def _get_bucket_sizes(num_participants):
   """Get the size of buckets in which seeds can be randomized.
