@@ -7,6 +7,16 @@ for Super Smash Bros. Melee).
 All examples are assumed to be run from a downloaded version of this
 repository.
 
+# Index
+
+* [Get Started](https://github.com/akbiggs/challonge-tools#get-started)
+* [gaR PR Seeds (with Challonge)](https://github.com/akbiggs/challonge-tools#gar-pr-seeds-with-challonge)
+* [gaR PR Seeds (without Challonge)](https://github.com/akbiggs/challonge-tools#gar-pr-seeds-without-challonge)
+* [Shuffle Seeds (with Challonge)](https://github.com/akbiggs/challonge-tools#shuffle-seeds-with-challonge)
+* [Shuffle Seeds (without Challonge)](https://github.com/akbiggs/challonge-tools#shuffle-seeds-without-challonge)
+* [Amateur Bracket Creator](https://github.com/akbiggs/challonge-tools#amateur-bracket-creator)
+* [Challonge Credentials Config](https://github.com/akbiggs/challonge-tools#challonge-credentials-config)
+
 # Get Started
 
 These scripts are currently written in
