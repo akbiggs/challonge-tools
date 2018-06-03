@@ -155,21 +155,21 @@ if __name__ == "__main__":
                          type=int, default=2,
                          help="the loser's round after which people are no "
                               "longer qualified for amateur bracket")
-  argparser.add_argument("--use_double_elimination",
-                         type=util.str_to_bool, default=True,
+  argparser.add_argument("--use_double_elimination", nargs="?",
+                         type=util.str_to_bool, default=True, const=True,
                          help="whether the amateur bracket should use double "
                               "elimination or single elimination")
   argparser.add_argument("--config_file",
                          default=defaults.DEFAULT_CONFIG_FILENAME,
                          help="the config file to read your Challonge "
                               "credentials from")
-  argparser.add_argument("--randomize_seeds",
-                         type=util.str_to_bool, default=False,
+  argparser.add_argument("--randomize_seeds", nargs="?",
+                         type=util.str_to_bool, default=False, const=True,
                          help="whether the seeds should be randomized in the "
                               "amateur bracket. If this is off, the same "
                               "seeds from the main bracket will be used")
-  argparser.add_argument("--associate_challonge_accounts",
-                         type=util.str_to_bool, default=True,
+  argparser.add_argument("--associate_challonge_accounts", nargs="?",
+                         type=util.str_to_bool, default=True, const=True,
                          help="whether challonge accounts should be "
                               "associated with the amateur bracket entrants. "
                               "This will invite their Challonge account to "
