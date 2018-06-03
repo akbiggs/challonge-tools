@@ -38,9 +38,10 @@ $ python <script_to_run>.py
 # gaR PR Seeds (with Challonge)
 
 `garpr_seeds_challonge.py`: Seeds a tourney based on
-[gaR PR](http://www.garpr.com) rankings. Any unrecognized names will be
-seeded in last-place (in order of their original appearance in the seeding
-list).
+[gaR PR](http://www.garpr.com) rankings.
+
+Any unrecognized names will be seeded in last-place (in order of their
+original appearance in the seeding list).
 
 ### Examples
 
