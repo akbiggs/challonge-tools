@@ -35,6 +35,51 @@ $ pip install --user -r requirements.txt
 $ python <script_to_run>.py
 ```
 
+# gaR PR Seeds (with Challonge)
+
+`garpr_seeds_challonge.py`: Seeds a tourney based on
+[gaR PR](http://www.garpr.com) rankings. Any unrecognized names will be
+seeded in last-place (in order of their original appearance in the seeding
+list).
+
+### Examples
+
+```
+$ python garpr_seeds_challonge.py 32w50dxc
+Tournament updated; see seeds at http://challonge.com/32w50dxc/participants.
+```
+
+You can change the region using the `--region` flag.
+
+```
+$ python garpr_seeds_challonge.py 32w50dxc --region=googlemtv
+Tournament updated; see seeds at http://challonge.com/32w50dxc/participants.
+```
+
+Flags:
+
+* `--region=googlemtv`: The region being used to get gaR PR rankings. Default:
+  `googlemtv`
+* `--print_only=False`: Set this to `True` if you just want to print out the
+  new seeds without committing them to the tournament. This is useful for
+  testing before you reseed your tournament. Default: `False`
+* `--config_file=challonge.ini`: The config file to read your Challonge
+  credentials from. This is useful to reduce the risk of accidentally
+  committing your credentials to source control. Default: `challonge.ini`
+
+# gaR PR Seeds (without Challonge)
+
+`garpr_seeds.py`: Gets seeds without using the Challonge API.
+
+Useful for testing out the rankings without an actual tournament.
+
+### Examples
+
+```
+$ python garpr_seeds.py "Eden, Bryan, Non-gaR PR Person, Admiral"
+[3, 2, 4, 1]
+```
+
 # Shuffle Seeds (with Challonge)
 
 `shuffle_seeds_challonge.py`: Shuffles seeds in a Challonge tournament.
@@ -58,7 +103,7 @@ shuffle order.
 
 * `--config_file=challonge.ini`: The config file to read your Challonge
   credentials from. This is useful to reduce the risk of accidentally
-  committing your credentials to source control.
+  committing your credentials to source control. Default: `challonge.ini`
 
 # Shuffle Seeds (without Challonge)
 

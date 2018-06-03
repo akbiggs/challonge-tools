@@ -48,7 +48,6 @@ import argparse
 import challonge
 import random
 import sys
-import urllib2
 
 # Local imports.
 import defaults
@@ -70,22 +69,6 @@ _CREDENTIALS_USER = "user"
 _CREDENTIALS_API_KEY = "api_key"
 
 
-def _get_participant_name(participant_info):
-  """Gets the name to use for a participant on Challonge.
-
-  Args:
-    participant_info: A Challonge participant model from the server.
-
-  Returns:
-    A string representing the name of the participant, or None if we
-    couldn't figure out their name.
-  """
-  # I got bitten by using "name" instead of "display-name" (there
-  # are some weird invitation-based cases where "name" is invalid),
-  # so I made this function to help me remember.
-  return participant_info["display-name"]
-
-
 def _get_params_to_create_participant(participant_info,
                                       associate_challonge_account, seed):
   """Gets the params used to register a participant in a new tourney.
@@ -105,7 +88,7 @@ def _get_params_to_create_participant(participant_info,
   """
   params = {}
   params[_PARAMS_SEED] = seed
-  params[_PARAMS_NAME] = _get_participant_name(participant_info)
+  params[_PARAMS_NAME] = util_challonge.get_participant_name(participant_info)
 
   # Using a dash in 'challonge-username' instead of using
   # _PARAMS_CHALLONGE_USERNAME is intentional: dashes are used in
@@ -161,8 +144,8 @@ def _get_num_amateurs(num_participants, cutoff):
   return num_amateurs
 
 
-# TODO: This main function is a mess, and totally won't make your life
-# easy if you want to make a GUI out of this in the future. Clean up your act.
+# TODO: This main function is a mess, and totally won't make my life
+# easy if I want to make a GUI out of this in the future. Clean up my act.
 if __name__ == "__main__":
   argparser = argparse.ArgumentParser(description="Create amateur brackets.")
   argparser.add_argument("tourney_name",
@@ -213,21 +196,9 @@ if __name__ == "__main__":
   else:
     amateur_tourney_type = "single elimination"
 
-  # This bit is ugly... we check that there's no existing amateur bracket
-  # for this tournament by getting a 404 from trying to fetch the URL we'll
-  # use for the amateur bracket. As far as I can tell, there's no nicer way
-  # to check if the bracket already exists with the Challonge API wrapper
-  # we're using.
-  existing_amateur_tournament = None
-  try:
-    existing_amateur_tournament = challonge.tournaments.show(
-        amateur_tourney_name)
-  except urllib2.HTTPError as err:
-    # If we got a 404, we queried fine and no amateur bracket exists,
-    # but otherwise we've got an unexpected error, so we escalate it.
-    if err.code != 404:
-      raise err
-
+  # Make sure the tournament doesn't already exist.
+  existing_amateur_tournament = util_challonge.get_tourney_info(
+      amateur_tourney_name)
   if existing_amateur_tournament:
     sys.stderr.write("Amateur tournament already exists at "
                      "{0}.\n".format(amateur_tourney_url))
@@ -278,17 +249,17 @@ if __name__ == "__main__":
   print "I creeped your tourney at http://challonge.com/{0}...".format(
       tourney_name)
   print ("Here's what I think the amateur bracket should look like, taking\n"
-         "all people eliminated before Loser's Round {1}:".format(
-             tourney_name, cutoff + 1))
+         "all people eliminated before Loser's Round {0}:".format(
+             cutoff + 1))
   print
   print "Title: {0}".format(amateur_tourney_title)
   print "URL: {0}".format(amateur_tourney_url)
   print "Elimination Type: {0}".format(amateur_tourney_type)
   print
   print "Seeds:"
-  need_to_send_at_least_one_email = any(
+  need_to_send_at_least_one_invite = any(
       x.get(_PARAMS_CHALLONGE_USERNAME) for x in all_amateur_params)
-  if need_to_send_at_least_one_email:
+  if need_to_send_at_least_one_invite:
     # I really don't want people accidentally sending email invites, so
     # we're very explicit about email invites and how to turn them off.
     print ("(to disable invites, use --associate_challonge_accounts=False)")

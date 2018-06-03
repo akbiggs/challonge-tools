@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 
 
+"""Shuffles seeds in a Challonge bracket.
+
+Usage:
+
+    python shuffle_seeds_challonge.py <tournament_name>
+
+Replace <tournament_name> with the name of the tournament in the URL.
+For example, for www.challonge.com/mtvmlee72:
+
+    python shuffle_seeds_challonge.py mtvmelee72
+"""
+
+
 # Python package imports.
 import argparse
 import challonge
