@@ -24,12 +24,13 @@ Participants should be ordered from 1st seed to last seed. Leading and trailing
 spaces in the participant names are stripped.
 """
 
-import challonge
+import argparse
 import numbers
 import random
 import sys
 
 import util
+
 
 def _get_num_participants_in_first_round(num_participants):
   """Gets the number of people in the first round of a tourney.
@@ -176,17 +177,22 @@ def get_shuffled_seeds(num_participants):
 
 
 if __name__ == "__main__":
-  if len(sys.argv) != 2:
-    sys.stderr.write(
-        "Usage: {0} [<num_participants> | <participants_list>]\n".format(
-            sys.argv[0]))
-    sys.exit(1)
+  argparser = argparse.ArgumentParser()
+  argparser.add_argument("participants",
+                         help="either a number of participants or "
+                              "comma-separated participant names")
+  argparser.add_argument("--seed", type=int, default=None,
+                         help="seed for random number generation")
+  args = argparser.parse_args()
 
-  if sys.argv[1].isdigit():
-    num_participants = int(sys.argv[1])
+  if args.seed:
+    random.seed(args.seed)
+
+  if args.participants.isdigit():
+    num_participants = int(args.participants)
     print get_shuffled_seeds(num_participants)
   else:
-    participants = [x.strip() for x in sys.argv[1].split(",")]
+    participants = [x.strip() for x in args.participants.split(",")]
     shuffled_seeds = get_shuffled_seeds(len(participants))
 
     # participants[0] is the first seed, so we subtract 1 from the seed number
