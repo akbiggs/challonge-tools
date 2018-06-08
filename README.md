@@ -16,6 +16,7 @@ repository.
 * [Shuffle Seeds (without Challonge)](https://github.com/akbiggs/challonge-tools#shuffle-seeds-without-challonge)
 * [Amateur Bracket Creator](https://github.com/akbiggs/challonge-tools#amateur-bracket-creator)
 * [Challonge Credentials Config](https://github.com/akbiggs/challonge-tools#challonge-credentials-config)
+* [Running Tests](https://github.com/akbiggs/challonge-tools#running-tests)
 
 # Get Started
 
