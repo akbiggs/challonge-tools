@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """Various utility functions that aren't related to Challonge things."""
@@ -67,11 +67,11 @@ def prompt_yes_no(prompt):
     True if the user answered yes, False if they answered yes.
   """
   while True:
-    print (prompt + " [y/n]"),
+    print((prompt + " [y/n]"), end=' ')
 
-    choice = raw_input().lower()
+    choice = input().lower()
     try:
       return str_to_bool(choice)
     except argparse.ArgumentTypeError:
-      print "Invalid response. Please say 'y' or 'n'."
+      print("Invalid response. Please say 'y' or 'n'.")
 

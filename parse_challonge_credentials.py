@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Tool for parsing Challonge credentials from a config file.
 
@@ -14,7 +14,7 @@ Example:
 """
 
 
-import ConfigParser
+import configparser
 import sys
 
 import defaults
@@ -43,7 +43,7 @@ def parse_challonge_credentials_from_config(config_filename):
   Returns:
     A dictionary with {"user", "api_key"} keys parsed from the config file.
   """
-  config_parser = ConfigParser.RawConfigParser()
+  config_parser = configparser.RawConfigParser()
   config_parser.read(config_filename)
 
   user = config_parser.get(
@@ -70,7 +70,7 @@ def safe_parse_challonge_credentials_from_config(config_filename):
   try:
     return parse_challonge_credentials_from_config(
         config_filename)
-  except ConfigParser.Error as err:
+  except configparser.Error as err:
     sys.stderr.write("Failed to read credentials from {0}: {1}.\n".format(
         config_filename, err))
     sys.stderr.write(
@@ -93,5 +93,5 @@ if __name__ == "__main__":
   if not credentials:
     sys.exit(1)
   else:
-    print credentials
+    print(credentials)
 
