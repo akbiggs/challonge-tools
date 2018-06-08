@@ -20,9 +20,8 @@ repository.
 
 # Get Started
 
-These scripts are currently written in
-[Python 2](https://www.python.org/downloads/), and are incompatible
-with Python 3. I'll upgrade them soon, I promise.
+These scripts use [Python 3](https://www.python.org/downloads/), and are incompatible
+with Python 2.
 
 1. Clone and enter the repository.
 
@@ -43,7 +42,7 @@ $ pip install --user -r requirements.txt
 4. Run the script you want to try!
 
 ```
-$ python <script_to_run>.py
+$ python3 <script_to_run>.py
 ```
 
 # gaR PR Seeds (with Challonge)
@@ -57,14 +56,14 @@ original appearance in the seeding list). Case is ignored in names.
 ### Examples
 
 ```
-$ python garpr_seeds_challonge.py 32w50dxc
+$ python3 garpr_seeds_challonge.py 32w50dxc
 Tournament updated; see seeds at http://challonge.com/32w50dxc/participants.
 ```
 
 You can change the region using the `--region` flag.
 
 ```
-$ python garpr_seeds_challonge.py 32w50dxc --region=googlemtv
+$ python3 garpr_seeds_challonge.py 32w50dxc --region=googlemtv
 Tournament updated; see seeds at http://challonge.com/32w50dxc/participants.
 ```
 
@@ -88,7 +87,7 @@ Useful for testing out the rankings without an actual tournament.
 ### Examples
 
 ```
-$ python garpr_seeds.py "Eden, Bryan, Non-gaR PR Person, Admiral"
+$ python3 garpr_seeds.py "Eden, Bryan, Non-gaR PR Person, Admiral"
 [3, 2, 4, 1]
 ```
 
@@ -104,7 +103,7 @@ Challonge's "shuffle seeds", which just randomizes everything.
 ### Example
 
 ```
-$ python shuffle_seeds_challonge.py zcmvlkxm
+$ python3 shuffle_seeds_challonge.py zcmvlkxm
 Seeds shuffled: http://challonge.com/zcmvlkxm/participants
 ```
 
@@ -127,7 +126,7 @@ when you just want to test out the randomization.
 ### Examples
 
 ```
-$ python shuffle_seeds.py 9
+$ python3 shuffle_seeds.py 9
 [1, 2, 3, 4, 6, 5, 8, 7, 9]
 ```
 
@@ -136,7 +135,7 @@ of participants. Each number indicates where the corresponding seed should be
 listed.
 
 ```
-$ python shuffle_seeds.py "Neal, Bryan, Paragon, gaR, Admiral Lightning Bolt, Eden"
+$ python3 shuffle_seeds.py "Neal, Bryan, Paragon, gaR, Admiral Lightning Bolt, Eden"
 ['Neal', 'Bryan', 'Paragon', 'gaR', 'Eden', 'Admiral Lightning Bolt']
 ```
 
@@ -157,7 +156,7 @@ soul-crushing learning curve like Melee.
 ### Examples
 
 ```
-$ python create_amateur_bracket.py mtvmelee72
+$ python3 create_amateur_bracket.py mtvmelee72
 ```
 
 Examines [http://challonge.com/mtvmelee72](http://challonge.com/mtvmelee72)
@@ -200,7 +199,7 @@ Example sessions with this tool:
 e.g.
 
 ```
-$ python create_amateur_bracket.py mtvmelee72 \
+$ python3 create_amateur_bracket.py mtvmelee72 \
       --config_file=akbiggs_challonge.ini \
       --use_double_elimination=False \
 ```
@@ -219,7 +218,7 @@ ignored from your git repo instead of hardcoding it into your code.
 See challonge.ini for an example config file with instructions.
 
 ```
-$ python parse_challonge_config.py my_challonge.ini
+$ python3 parse_challonge_config.py my_challonge.ini
 { user: 'blah', api_key: 'not telling' }
 ```
 

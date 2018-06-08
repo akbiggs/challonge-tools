@@ -24,7 +24,7 @@ seed=1500
   assert_line "['Neal', 'Bryan', 'Paragon', 'gaR', 'Eden', 'Admiral Lightning Bolt']"
 }
 
-@test "$shuffle_seeds needs one argument" {
+@test "$shuffle_seeds fails when given no arguments" {
   run $shuffle_seeds
   assert_failure
 }
