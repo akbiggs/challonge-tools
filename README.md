@@ -21,7 +21,8 @@ repository.
 # Get Started
 
 These scripts use [Python 3](https://www.python.org/downloads/), and are incompatible
-with Python 2.
+with Python 2. If you run into any issues setting this up, feel free to [open
+up a new issue here](https://github.com/akbiggs/challonge-tools/issues).
 
 1. Clone and enter the repository.
 
@@ -30,16 +31,24 @@ $ git clone https://github.com/akbiggs/challonge-tools
 $ cd challonge-tools
 ```
 
-2. Install python dependencies.
+2. **(Recommended):** Create and activate a new Python virtual environment.
+This will help ensure that your environment is configured correctly.
 
 ```
-$ pip install --user -r requirements.txt
+python3 -m venv challonge_tools_env
+source challonge_tools_env/bin/activate
 ```
 
-3. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
+3. Install python package dependencies.
+
+```
+$ pip install -r requirements.txt
+```
+
+4. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
    with your Challonge username and [API key](https://challonge.com/settings/developer).
 
-4. Run the script you want to try!
+5. Run the script you want to try!
 
 ```
 $ python3 <script_to_run>.py
