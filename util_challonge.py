@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """Various common utility functions that interact with Challonge."""
 
 
 import challonge
-import urllib2
+import requests.exceptions
 
 from parse_challonge_credentials import safe_parse_challonge_credentials_from_config
 
@@ -58,10 +58,10 @@ def get_tourney_info(name):
   tourney_info = None
   try:
     tourney_info = challonge.tournaments.show(name)
-  except urllib2.HTTPError as err:
+  except requests.exceptions.HTTPError as err:
     # If we got a 404, we queried fine and no amateur bracket exists,
     # but otherwise we've got an unexpected error, so we escalate it.
-    if err.code != 404:
+    if err.response.status_code != 404:
       raise err
 
   return tourney_info
@@ -77,8 +77,8 @@ def get_participant_name(participant_info):
     A string representing the name of the participant, or None if we
     couldn't figure out their name.
   """
-  # I got bitten by using "name" instead of "display-name" (there
+  # I got bitten by using "name" instead of "display_name" (there
   # are some weird invitation-based cases where "name" is invalid),
   # so I made this function to help me remember.
-  return participant_info["display-name"]
+  return participant_info["display_name"]
 

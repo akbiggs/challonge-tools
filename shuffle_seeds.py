@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """Utilities for shuffling seeds in a tournament.
@@ -87,7 +87,7 @@ def get_num_participants_placing_last(num_participants,
 
   num_in_first_round = _get_num_participants_in_first_round(
       num_participants)
-  num_losing_in_first_round = num_in_first_round / 2
+  num_losing_in_first_round = num_in_first_round // 2
   if not double_elimination:
     return num_losing_in_first_round
   
@@ -96,13 +96,11 @@ def get_num_participants_placing_last(num_participants,
   # round two of losers. These two groups of people are combined to form the
   # initial loser's bracket. Half the people who fall into the first round of
   # the loser's bracket will place last.
-  num_in_second_winners_round = (
-      num_participants - num_losing_in_first_round)
-  num_losing_in_second_winners_round = (
-      num_in_second_winners_round / 2)
+  num_in_second_winners_round = num_participants - num_losing_in_first_round
+  num_losing_in_second_winners_round = num_in_second_winners_round // 2
   num_in_first_losers_round = _get_num_participants_in_first_round(
       num_losing_in_first_round + num_losing_in_second_winners_round)
-  num_losing_in_first_losers_round = num_in_first_losers_round / 2
+  num_losing_in_first_losers_round = num_in_first_losers_round // 2
   return num_losing_in_first_losers_round
 
 
@@ -149,7 +147,7 @@ def _get_buckets(num_participants):
   last_seed_in_bucket = num_participants
   for bucket_size in _get_bucket_sizes(num_participants):
     top_seed_in_bucket = last_seed_in_bucket - bucket_size + 1
-    yield range(top_seed_in_bucket, last_seed_in_bucket + 1)
+    yield list(range(top_seed_in_bucket, last_seed_in_bucket + 1))
     
     last_seed_in_bucket = top_seed_in_bucket - 1 
 
@@ -190,7 +188,7 @@ if __name__ == "__main__":
 
   if args.participants.isdigit():
     num_participants = int(args.participants)
-    print get_shuffled_seeds(num_participants)
+    print(get_shuffled_seeds(num_participants))
   else:
     participants = [x.strip() for x in args.participants.split(",")]
     shuffled_seeds = get_shuffled_seeds(len(participants))
@@ -198,5 +196,5 @@ if __name__ == "__main__":
     # participants[0] is the first seed, so we subtract 1 from the seed number
     # to get the index of the participant.
     shuffled_participants = [participants[seed - 1] for seed in shuffled_seeds]
-    print shuffled_participants
+    print(shuffled_participants)
 

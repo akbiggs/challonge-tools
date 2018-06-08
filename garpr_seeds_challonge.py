@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """Seeds a Challonge tournament based on gaR PR rankings.
@@ -89,20 +89,20 @@ if __name__ == "__main__":
   # Let the user know which participants couldn't be found.
   for i, participant in enumerate(participants):
     if ranks[i] == garpr_seeds.UNKNOWN_RANK:
-      print "Could not find gaR PR info for {0}, seeding {1}.".format(
-          participant_names[i], new_seeds[i])
+      print("Could not find gaR PR info for {0}, seeding {1}.".format(
+          participant_names[i], new_seeds[i]))
 
   # Sort and update the participants on Challonge. They need to be sorted
   # before updating their seed, or else the order of the seeds could get
   # disrupted from reordering as seeds are changed.
   sorted_participants = _sort_by_seeds(participants, new_seeds)
   for i, participant in enumerate(sorted_participants):
-    print "{0}. {1}".format(
-        i + 1, util_challonge.get_participant_name(participant))
+    print("{0}. {1}".format(
+        i + 1, util_challonge.get_participant_name(participant)))
     if not args.print_only:
       challonge.participants.update(tourney_name, participant["id"],
                                     seed = i + 1)
 
   if not args.print_only:
-    print "Tournament updated; see seeds at {0}/participants.".format(
-        tourney_url)
+    print("Tournament updated; see seeds at {0}/participants.".format(
+        tourney_url))

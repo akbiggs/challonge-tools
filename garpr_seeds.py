@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 import argparse
@@ -87,7 +87,7 @@ def ranks_to_seeds(ranks):
   # Our approach is to sort the ranks since seeds should just be the
   # sorted order of the known ranks. We filter out unknown ranks since they'd
   # disrupt the order.
-  sorted_known_ranks = filter(lambda x: x != UNKNOWN_RANK, sorted(ranks))
+  sorted_known_ranks = [x for x in sorted(ranks) if x != UNKNOWN_RANK]
   
   next_last_place_seed = len(sorted_known_ranks) + 1
   seeds = []
@@ -134,5 +134,5 @@ if __name__ == "__main__":
   region = args.region
   names = [x.strip() for x in args.names.split(",")]
   ranks = get_garpr_ranks(names, region)
-  print ranks_to_seeds(ranks)
+  print(ranks_to_seeds(ranks))
 

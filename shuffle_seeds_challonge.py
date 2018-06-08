@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """Shuffles seeds in a Challonge bracket.
@@ -69,4 +69,4 @@ if __name__ == "__main__":
     challonge.participants.update(tourney_name, participant_id,
                                   seed = new_seed)
 
-  print "Seeds shuffled: {0}/participants".format(tourney_url)
+  print("Seeds shuffled: {0}/participants".format(tourney_url))

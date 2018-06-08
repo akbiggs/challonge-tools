@@ -1,7 +1,9 @@
 certifi==2018.4.16
 chardet==3.0.4
 idna==2.6
-iso8601==0.1.11
--e git+http://github.com/russ-/pychallonge@bc202d7140cb08d11d345564f721c2f57129b84f#egg=pychallonge
+iso8601==0.1.12
+pychal==1.8.1
+pytz==2018.4
 requests==2.18.4
+tzlocal==1.5.1
 urllib3==1.22
