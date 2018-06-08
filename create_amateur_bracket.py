@@ -166,7 +166,7 @@ if __name__ == "__main__":
                               "amateur bracket. If this is off, the same "
                               "seeds from the main bracket will be used")
   argparser.add_argument("--associate_challonge_accounts", nargs="?",
-                         type=util.str_to_bool, default=True, const=True,
+                         type=util.str_to_bool, default=False, const=True,
                          help="whether challonge accounts should be "
                               "associated with the amateur bracket entrants. "
                               "This will invite their Challonge account to "
