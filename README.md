@@ -221,3 +221,18 @@ See challonge.ini for an example config file with instructions.
 $ python parse_challonge_config.py my_challonge.ini
 { user: 'blah', api_key: 'not telling' }
 ```
+
+# Running Tests
+
+Before running the tests, you will need to initialize
+[Bats](https://github.com/sstephenson/bats):
+
+```
+git submodule update --init --recursive
+```
+
+Afterwards, just run `test.sh` to run all the unit tests:
+
+```
+./test.sh
+```
