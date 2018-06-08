@@ -22,3 +22,9 @@ garpr_seeds="./garpr_seeds.py"
   assert_success
   assert_line --regexp "^\[[1-3], [1-3], 4, [1-3], 5\]$"
 }
+
+@test "$garpr_seeds ignores spelling case" {
+  correct_case="$($garpr_seeds 'Eden, gaR, Admiral')"
+  weird_case="$($garpr_seeds 'eDen, Gar, aDmIrAl')"
+  assert_equal "$correct_case" "$weird_case"
+}

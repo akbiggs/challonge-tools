@@ -51,7 +51,7 @@ def _find_ranking_for_name(name, rankings):
     ranking already exists.
   """
   for ranking in rankings:
-    if ranking["name"] == name:
+    if ranking["name"].lower() == name.lower():
       return ranking
   return None
 

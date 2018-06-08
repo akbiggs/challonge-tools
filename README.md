@@ -52,7 +52,7 @@ $ python <script_to_run>.py
 [gaR PR](http://www.garpr.com) rankings.
 
 Any unrecognized names will be seeded in last-place (in order of their
-original appearance in the seeding list).
+original appearance in the seeding list). Case is ignored in names.
 
 ### Examples
 
