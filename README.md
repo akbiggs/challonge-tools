@@ -85,7 +85,7 @@ Flags:
   testing before you reseed your tournament. Default: `False`
 * `--shuffle=False`: Set this to `True` if you want to shuffle the seeds
   afterwards while still preserving each participant's projected placement.
-  This helps to introduce a bit of variance into the bracket.
+  This helps to introduce a bit of variance into the bracket. Default: `False`
 * `--config_file=challonge.ini`: The config file to read your Challonge
   credentials from. This is useful to reduce the risk of accidentally
   committing your credentials to source control. Default: `challonge.ini`
