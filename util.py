@@ -9,7 +9,7 @@ import random
 
 
 def shuffle(values):
-  """Returns the list of values shuffled.
+    """Returns the list of values shuffled.
   
   This is different from random.shuffle because it returns a new list
   instead of operating in-place.
@@ -20,11 +20,11 @@ def shuffle(values):
   Returns:
     The values shuffled into a random order.
   """
-  return random.sample(values, len(values))
+    return random.sample(values, len(values))
 
 
 def flatten(lists):
-  """Flattens a list of lists into a single list of values.
+    """Flattens a list of lists into a single list of values.
   
   Args:
     lists: A list of lists.
@@ -32,11 +32,11 @@ def flatten(lists):
   Returns:
     The list flattened into a single list, with the same order of values.
   """
-  return [x for sublist in lists for x in sublist]
+    return [x for sublist in lists for x in sublist]
 
 
 def str_to_bool(s):
-  """Converts a string value to a boolean value.
+    """Converts a string value to a boolean value.
 
   Args:
     s: The string to convert to a boolean value.
@@ -47,16 +47,16 @@ def str_to_bool(s):
   Returns:
     The corresponding boolean value for the string.
   """
-  if s.lower() in ('yes', 'true', 't', 'y', '1'):
-    return True
-  elif s.lower() in ('no', 'false', 'f', 'n', '0'):
-    return False
-  else:
-    raise argparse.ArgumentTypeError('Boolean value expected.')
+    if s.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif s.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def prompt_yes_no(prompt):
-  """Prompts the user to respond yes/no to a question.
+    """Prompts the user to respond yes/no to a question.
   
   Asks repeatedly until valid input is given.
 
@@ -66,12 +66,11 @@ def prompt_yes_no(prompt):
   Returns:
     True if the user answered yes, False if they answered yes.
   """
-  while True:
-    print((prompt + " [y/n]"), end=' ')
+    while True:
+        print((prompt + " [y/n]"), end=" ")
 
-    choice = input().lower()
-    try:
-      return str_to_bool(choice)
-    except argparse.ArgumentTypeError:
-      print("Invalid response. Please say 'y' or 'n'.")
-
+        choice = input().lower()
+        try:
+            return str_to_bool(choice)
+        except argparse.ArgumentTypeError:
+            print("Invalid response. Please say 'y' or 'n'.")

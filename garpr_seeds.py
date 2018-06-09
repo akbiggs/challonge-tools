@@ -26,7 +26,7 @@ Usage:
 
 
 def _fetch_garpr_rankings(region):
-  """Fetches the gaR PR rankings from a given region.
+    """Fetches the gaR PR rankings from a given region.
 
   Args:
     region: The region of the gaR PR tournament.
@@ -35,12 +35,12 @@ def _fetch_garpr_rankings(region):
     A list of ranking responses for that region. Basically the same response
     that you would get from querying /rankings using the gaR PR API.
   """
-  rankings_url = "https://www.garpr.com:3001/{0}/rankings".format(region)
-  return requests.get(rankings_url).json()["ranking"]
+    rankings_url = "https://www.garpr.com:3001/{0}/rankings".format(region)
+    return requests.get(rankings_url).json()["ranking"]
 
 
 def _find_ranking_for_name(name, rankings):
-  """Finds a user's ranking info.
+    """Finds a user's ranking info.
 
   Args:
     name: The name of the user whose ranking we want to find.
@@ -50,14 +50,14 @@ def _find_ranking_for_name(name, rankings):
     The ranking object that corresponds to that user, or None if no
     ranking already exists.
   """
-  for ranking in rankings:
-    if ranking["name"].lower() == name.lower():
-      return ranking
-  return None
+    for ranking in rankings:
+        if ranking["name"].lower() == name.lower():
+            return ranking
+    return None
 
 
 def _get_rank(ranking):
-  """Retrieves a rank from a gaR PR ranking.
+    """Retrieves a rank from a gaR PR ranking.
 
   Args:
     ranking: The gaR PR ranking response object.
@@ -65,11 +65,11 @@ def _get_rank(ranking):
   Returns:
     The player's rank, or UNKNOWN_RANK if their ranking is unknown.
   """
-  return ranking["rank"] if ranking else UNKNOWN_RANK
+    return ranking["rank"] if ranking else UNKNOWN_RANK
 
 
 def ranks_to_seeds(ranks):
-  """Squashes ranks so they're ordered from 1 to N and can be used as seeds.
+    """Squashes ranks so they're ordered from 1 to N and can be used as seeds.
 
   e.g. [4, 6, UNKNOWN_RANK, 2, UNKNOWN_RANK] => [2, 3, 4, 1, 5]
 
@@ -84,25 +84,25 @@ def ranks_to_seeds(ranks):
     sorted list of ranks is 1, and all unknown ranks are converted to
     last-place seeds in order of appearance.
   """
-  # Our approach is to sort the ranks since seeds should just be the
-  # sorted order of the known ranks. We filter out unknown ranks since they'd
-  # disrupt the order.
-  sorted_known_ranks = [x for x in sorted(ranks) if x != UNKNOWN_RANK]
-  
-  next_last_place_seed = len(sorted_known_ranks) + 1
-  seeds = []
-  for i, rank in enumerate(ranks):
-    if rank == UNKNOWN_RANK:
-      seeds.append(next_last_place_seed)
-      next_last_place_seed = next_last_place_seed + 1
-    else:
-      seeds.append(sorted_known_ranks.index(rank) + 1)
+    # Our approach is to sort the ranks since seeds should just be the
+    # sorted order of the known ranks. We filter out unknown ranks since they'd
+    # disrupt the order.
+    sorted_known_ranks = [x for x in sorted(ranks) if x != UNKNOWN_RANK]
 
-  return seeds
- 
- 
+    next_last_place_seed = len(sorted_known_ranks) + 1
+    seeds = []
+    for i, rank in enumerate(ranks):
+        if rank == UNKNOWN_RANK:
+            seeds.append(next_last_place_seed)
+            next_last_place_seed = next_last_place_seed + 1
+        else:
+            seeds.append(sorted_known_ranks.index(rank) + 1)
+
+    return seeds
+
+
 def get_garpr_ranks(names, region):
-  """Gets the seeds for names based off of gaR PR rankings.
+    """Gets the seeds for names based off of gaR PR rankings.
 
   Args:
     names: A list of names of the people you want to get ranks for. These
@@ -113,26 +113,28 @@ def get_garpr_ranks(names, region):
     A list of ranks for those players. UNKNOWN_RANK will be returned as the
     rank for any player that is not currently on the gaR PR.
   """
-  rankings = _fetch_garpr_rankings(region)
-  name_rankings = [_find_ranking_for_name(name, rankings) for name in names]
-  ranks = [_get_rank(ranking) for ranking in name_rankings]
-  return ranks
+    rankings = _fetch_garpr_rankings(region)
+    name_rankings = [_find_ranking_for_name(name, rankings) for name in names]
+    ranks = [_get_rank(ranking) for ranking in name_rankings]
+    return ranks
 
 
 if __name__ == "__main__":
-  argparser = argparse.ArgumentParser(
-      description="Generates seeds for a tournament from gaR PR rankings.")
-  argparser.add_argument("names",
-                         help="the names of the players to seed")
-  argparser.add_argument("--region", default=defaults.DEFAULT_REGION,
-                         help="the region from which the gaR PR rankings "
-                              "should be pulled from. For example, in the "
-                              "URL http://garpr.com/googlemtv/players, the "
-                              "region is 'googlemtv'")
-  args = argparser.parse_args()
+    argparser = argparse.ArgumentParser(
+        description="Generates seeds for a tournament from gaR PR rankings."
+    )
+    argparser.add_argument("names", help="the names of the players to seed")
+    argparser.add_argument(
+        "--region",
+        default=defaults.DEFAULT_REGION,
+        help="the region from which the gaR PR rankings "
+        "should be pulled from. For example, in the "
+        "URL http://garpr.com/googlemtv/players, the "
+        "region is 'googlemtv'",
+    )
+    args = argparser.parse_args()
 
-  region = args.region
-  names = [x.strip() for x in args.names.split(",")]
-  ranks = get_garpr_ranks(names, region)
-  print(ranks_to_seeds(ranks))
-
+    region = args.region
+    names = [x.strip() for x in args.names.split(",")]
+    ranks = get_garpr_ranks(names, region)
+    print(ranks_to_seeds(ranks))
