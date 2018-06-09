@@ -20,6 +20,7 @@ import sys
 
 import defaults
 import garpr_seeds
+import shuffle_seeds
 import util
 import util_challonge
 
@@ -60,6 +61,9 @@ if __name__ == "__main__":
                               "should be pulled from. For example, in the "
                               "URL http://garpr.com/googlemtv/players, the "
                               "region is 'googlemtv'")
+  argparser.add_argument("--shuffle", nargs="?",
+                         type=util.str_to_bool, default=False, const=True,
+                         help="shuffles the seeds after seeding with gaR PR")
   argparser.add_argument("--print_only", nargs="?",
                          type=util.str_to_bool, default=False, const=True,
                          help="just prints the seeds without changing the "
@@ -89,13 +93,19 @@ if __name__ == "__main__":
   # Let the user know which participants couldn't be found.
   for i, participant in enumerate(participants):
     if ranks[i] == garpr_seeds.UNKNOWN_RANK:
-      print("Could not find gaR PR info for {0}, seeding {1}.".format(
-          participant_names[i], new_seeds[i]))
+      print("Could not find gaR PR info for {0}, seeding {1}".format(
+          participant_names[i], new_seeds[i]), end=" ")
 
-  # Sort and update the participants on Challonge. They need to be sorted
+  # Sort the participants on Challonge. They need to be sorted
   # before updating their seed, or else the order of the seeds could get
   # disrupted from reordering as seeds are changed.
   sorted_participants = _sort_by_seeds(participants, new_seeds)
+  
+  # Shuffle the seeds to vary up the bracket a bit.
+  if args.shuffle:
+    shuffled_seeds = shuffle_seeds.get_shuffled_seeds(len(participants))
+    sorted_participants = _sort_by_seeds(sorted_participants, shuffled_seeds)
+  
   for i, participant in enumerate(sorted_participants):
     print("{0}. {1}".format(
         i + 1, util_challonge.get_participant_name(participant)))
