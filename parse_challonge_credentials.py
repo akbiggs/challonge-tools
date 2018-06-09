@@ -10,7 +10,6 @@ Example:
 
   python parse_challonge_config.py my_challonge.ini
     => { user: 'blah', api_key: 'not telling' }
-
 """
 
 
@@ -28,21 +27,21 @@ _CHALLONGE_CONFIG_API_KEY_OPTION = "api_key"
 
 def parse_challonge_credentials_from_config(config_filename):
     """Parses Challonge credentials from a config file.
-  
-  Args:
-    config_filename: The filename of the config file to parse.
- 
-  Raises:
-    ConfigParser.NoSectionError:
-      If the file doesn't exist or the Challonge Credentials section doesn't
-      exist in the config file.
 
-    ConfigParser.NoOptionError:
-      If the user or api_key options don't exist in the config file.
- 
-  Returns:
-    A dictionary with {"user", "api_key"} keys parsed from the config file.
-  """
+    Args:
+      config_filename: The filename of the config file to parse.
+
+    Raises:
+      ConfigParser.NoSectionError:
+        If the file doesn't exist or the Challonge Credentials section doesn't
+        exist in the config file.
+
+      ConfigParser.NoOptionError:
+        If the user or api_key options don't exist in the config file.
+
+    Returns:
+      A dictionary with {"user", "api_key"} keys parsed from the config file.
+    """
     config_parser = configparser.RawConfigParser()
     config_parser.read(config_filename)
 
@@ -59,15 +58,15 @@ def parse_challonge_credentials_from_config(config_filename):
 def safe_parse_challonge_credentials_from_config(config_filename):
     """Parses Challonge credentials from a config file with error handling.
 
-  Config parsing errors will be caught and logged to stderr.
+    Config parsing errors will be caught and logged to stderr.
 
-  Args:
-    config_filenae: The filename of the config file to parse.
-  
-  Returns:
-    A dictionary with {"user", "api_key"} keys parsed from the config file,
-    or None if the credentials could not be parsed.
-  """
+    Args:
+      config_filenae: The filename of the config file to parse.
+
+    Returns:
+      A dictionary with {"user", "api_key"} keys parsed from the config file,
+      or None if the credentials could not be parsed.
+    """
     try:
         return parse_challonge_credentials_from_config(config_filename)
     except configparser.Error as err:

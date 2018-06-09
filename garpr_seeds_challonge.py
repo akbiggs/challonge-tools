@@ -27,16 +27,16 @@ import util_challonge
 def _sort_by_seeds(values, seeds):
     """Sorts a list of values by corresponding seed values.
 
-  e.g. ["x", "y", "z"], [2, 1, 3] => ["y", "x", "z"]
+    e.g. ["x", "y", "z"], [2, 1, 3] => ["y", "x", "z"]
 
-  Args:
-    values: A list of values.
-    seeds: A list of the same size as |values| containing Challonge seeds
-           for those values.
+    Args:
+      values: A list of values.
+      seeds: A list of the same size as |values| containing Challonge seeds
+             for those values.
 
-  Returns:
-    The list of values, but resorted using the order of the seeds.
-  """
+    Returns:
+      The list of values, but resorted using the order of the seeds.
+    """
     enumerated_values = list(enumerate(values))
     sorted_enumerated_values = sorted(enumerated_values, key=lambda x: seeds[x[0]])
     return [x[1] for x in sorted_enumerated_values]

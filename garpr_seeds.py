@@ -28,13 +28,13 @@ Usage:
 def _fetch_garpr_rankings(region):
     """Fetches the gaR PR rankings from a given region.
 
-  Args:
-    region: The region of the gaR PR tournament.
+    Args:
+      region: The region of the gaR PR tournament.
 
-  Returns:
-    A list of ranking responses for that region. Basically the same response
-    that you would get from querying /rankings using the gaR PR API.
-  """
+    Returns:
+      A list of ranking responses for that region. Basically the same response
+      that you would get from querying /rankings using the gaR PR API.
+    """
     rankings_url = "https://www.garpr.com:3001/{0}/rankings".format(region)
     return requests.get(rankings_url).json()["ranking"]
 
@@ -42,14 +42,14 @@ def _fetch_garpr_rankings(region):
 def _find_ranking_for_name(name, rankings):
     """Finds a user's ranking info.
 
-  Args:
-    name: The name of the user whose ranking we want to find.
-    rankings: The list of gaR PR ranking objects we wanna look through.
+    Args:
+      name: The name of the user whose ranking we want to find.
+      rankings: The list of gaR PR ranking objects we wanna look through.
 
-  Returns:
-    The ranking object that corresponds to that user, or None if no
-    ranking already exists.
-  """
+    Returns:
+      The ranking object that corresponds to that user, or None if no
+      ranking already exists.
+    """
     for ranking in rankings:
         if ranking["name"].lower() == name.lower():
             return ranking
@@ -59,31 +59,31 @@ def _find_ranking_for_name(name, rankings):
 def _get_rank(ranking):
     """Retrieves a rank from a gaR PR ranking.
 
-  Args:
-    ranking: The gaR PR ranking response object.
+    Args:
+      ranking: The gaR PR ranking response object.
 
-  Returns:
-    The player's rank, or UNKNOWN_RANK if their ranking is unknown.
-  """
+    Returns:
+      The player's rank, or UNKNOWN_RANK if their ranking is unknown.
+    """
     return ranking["rank"] if ranking else UNKNOWN_RANK
 
 
 def ranks_to_seeds(ranks):
     """Squashes ranks so they're ordered from 1 to N and can be used as seeds.
 
-  e.g. [4, 6, UNKNOWN_RANK, 2, UNKNOWN_RANK] => [2, 3, 4, 1, 5]
+    e.g. [4, 6, UNKNOWN_RANK, 2, UNKNOWN_RANK] => [2, 3, 4, 1, 5]
 
-  Args:
-    ranks: The numerical ranks of the players from gaR PR. UNKNOWN_RANK should
-           be used if the player has no ranks. All ranks are expected to be
-           unique.
+    Args:
+      ranks: The numerical ranks of the players from gaR PR. UNKNOWN_RANK should
+             be used if the player has no ranks. All ranks are expected to be
+             unique.
 
-  Returns:
-    The seeds, in the same order as the original ranks. The order of values is
-    sequential, such that the largest difference between any two ranks in a
-    sorted list of ranks is 1, and all unknown ranks are converted to
-    last-place seeds in order of appearance.
-  """
+    Returns:
+      The seeds, in the same order as the original ranks. The order of values is
+      sequential, such that the largest difference between any two ranks in a
+      sorted list of ranks is 1, and all unknown ranks are converted to
+      last-place seeds in order of appearance.
+    """
     # Our approach is to sort the ranks since seeds should just be the
     # sorted order of the known ranks. We filter out unknown ranks since they'd
     # disrupt the order.
@@ -104,15 +104,15 @@ def ranks_to_seeds(ranks):
 def get_garpr_ranks(names, region):
     """Gets the seeds for names based off of gaR PR rankings.
 
-  Args:
-    names: A list of names of the people you want to get ranks for. These
-           names should correspond to their name on the gaR PR.
-    region: The gaR PR region that you want to pull rankings from.
+    Args:
+      names: A list of names of the people you want to get ranks for. These
+             names should correspond to their name on the gaR PR.
+      region: The gaR PR region that you want to pull rankings from.
 
-  Returns:
-    A list of ranks for those players. UNKNOWN_RANK will be returned as the
-    rank for any player that is not currently on the gaR PR.
-  """
+    Returns:
+      A list of ranks for those players. UNKNOWN_RANK will be returned as the
+      rank for any player that is not currently on the gaR PR.
+    """
     rankings = _fetch_garpr_rankings(region)
     name_rankings = [_find_ranking_for_name(name, rankings) for name in names]
     ranks = [_get_rank(ranking) for ranking in name_rankings]
