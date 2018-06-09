@@ -7,5 +7,5 @@ repos:
 -   repo: https://github.com/akbiggs/docformatter
     rev: stable
     hooks:
-    - id: docformatter
+    - id: docformatter-venv
 
