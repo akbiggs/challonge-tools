@@ -20,6 +20,7 @@ import sys
 
 import defaults
 import garpr_seeds
+import shuffle_seeds
 import util
 import util_challonge
 
@@ -27,16 +28,16 @@ import util_challonge
 def _sort_by_seeds(values, seeds):
     """Sorts a list of values by corresponding seed values.
 
-    e.g. ["x", "y", "z"], [2, 1, 3] => ["y", "x", "z"]
+  e.g. ["x", "y", "z"], [2, 1, 3] => ["y", "x", "z"]
 
-    Args:
-      values: A list of values.
-      seeds: A list of the same size as |values| containing Challonge seeds
-             for those values.
+  Args:
+    values: A list of values.
+    seeds: A list of the same size as |values| containing Challonge seeds
+           for those values.
 
-    Returns:
-      The list of values, but resorted using the order of the seeds.
-    """
+  Returns:
+    The list of values, but resorted using the order of the seeds.
+  """
     enumerated_values = list(enumerate(values))
     sorted_enumerated_values = sorted(enumerated_values, key=lambda x: seeds[x[0]])
     return [x[1] for x in sorted_enumerated_values]
@@ -65,6 +66,14 @@ if __name__ == "__main__":
         "should be pulled from. For example, in the "
         "URL http://garpr.com/googlemtv/players, the "
         "region is 'googlemtv'",
+    )
+    argparser.add_argument(
+        "--shuffle",
+        nargs="?",
+        type=util.str_to_bool,
+        default=False,
+        const=True,
+        help="shuffles the seeds after seeding with gaR PR",
     )
     argparser.add_argument(
         "--print_only",
@@ -98,15 +107,22 @@ if __name__ == "__main__":
     for i, participant in enumerate(participants):
         if ranks[i] == garpr_seeds.UNKNOWN_RANK:
             print(
-                "Could not find gaR PR info for {0}, seeding {1}.".format(
+                "Could not find gaR PR info for {0}, seeding {1}".format(
                     participant_names[i], new_seeds[i]
-                )
+                ),
+                end=" ",
             )
 
-    # Sort and update the participants on Challonge. They need to be sorted
+    # Sort the participants on Challonge. They need to be sorted
     # before updating their seed, or else the order of the seeds could get
     # disrupted from reordering as seeds are changed.
     sorted_participants = _sort_by_seeds(participants, new_seeds)
+
+    # Shuffle the seeds to vary up the bracket a bit.
+    if args.shuffle:
+        shuffled_seeds = shuffle_seeds.get_shuffled_seeds(len(participants))
+        sorted_participants = _sort_by_seeds(sorted_participants, shuffled_seeds)
+
     for i, participant in enumerate(sorted_participants):
         print(
             "{0}. {1}".format(i + 1, util_challonge.get_participant_name(participant))
