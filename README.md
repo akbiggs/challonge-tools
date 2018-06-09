@@ -83,6 +83,9 @@ Flags:
 * `--print_only=False`: Set this to `True` if you just want to print out the
   new seeds without committing them to the tournament. This is useful for
   testing before you reseed your tournament. Default: `False`
+* `--shuffle=False`: Set this to `True` if you want to shuffle the seeds
+  afterwards while still preserving each participant's projected placement.
+  This helps to introduce a bit of variance into the bracket.
 * `--config_file=challonge.ini`: The config file to read your Challonge
   credentials from. This is useful to reduce the risk of accidentally
   committing your credentials to source control. Default: `challonge.ini`
