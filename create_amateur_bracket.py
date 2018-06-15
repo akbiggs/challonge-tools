@@ -165,14 +165,14 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "--randomize_seeds",
-        action='store_true',
+        action="store_true",
         help="whether the seeds should be randomized in the "
         "amateur bracket. If this is off, the same "
         "seeds from the main bracket will be used",
     )
     argparser.add_argument(
         "--associate_challonge_accounts",
-        action='store_true',
+        action="store_true",
         help="whether challonge accounts should be "
         "associated with the amateur bracket entrants. "
         "This will invite their Challonge account to "

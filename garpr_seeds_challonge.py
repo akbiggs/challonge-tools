@@ -69,12 +69,12 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "--shuffle",
-        action='store_true',
+        action="store_true",
         help="shuffles the seeds after seeding with gaR PR",
     )
     argparser.add_argument(
         "--print_only",
-        action='store_true',
+        action="store_true",
         help="just prints the seeds without changing the tournament",
     )
     args = argparser.parse_args()
