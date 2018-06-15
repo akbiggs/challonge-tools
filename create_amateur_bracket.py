@@ -8,13 +8,6 @@ hosts a separate tournament for them after the main tournament. This helps
 people get more practice and have more fun, especially in a game with a
 soul-crushing learning curve like Melee.
 
-Prerequisites:
-
-  1. pip install iso8601 # required for challongepy
-  2. pip install -e git+http://github.com/russ-/pychallonge#egg=pychallonge \
-         --user 
-  3. Setup your challonge.ini with your API key and username.
-
 Examples:
 
   1. python create_amateur_bracket.py <my_tournament_name>
@@ -70,8 +63,7 @@ _CREDENTIALS_API_KEY = "api_key"
 
 
 def _get_params_to_create_participant(
-    participant_info, associate_challonge_account, seed
-):
+        participant_info, associate_challonge_account, seed):
     """Gets the params used to register a participant in a new tourney.
 
   Args:
@@ -144,7 +136,8 @@ def _get_num_amateurs(num_participants, cutoff):
 # TODO: This main function is a mess, and totally won't make my life
 # easy if I want to make a GUI out of this in the future. Clean up my act.
 if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(description="Create amateur brackets.")
+    argparser = argparse.ArgumentParser(description="Create amateur brackets.",
+                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     argparser.add_argument(
         "tourney_name",
         help="the name of the tourney to create an amateur " "bracket for",
@@ -172,20 +165,14 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "--randomize_seeds",
-        nargs="?",
-        type=util.str_to_bool,
-        default=False,
-        const=True,
+        action='store_true',
         help="whether the seeds should be randomized in the "
         "amateur bracket. If this is off, the same "
         "seeds from the main bracket will be used",
     )
     argparser.add_argument(
         "--associate_challonge_accounts",
-        nargs="?",
-        type=util.str_to_bool,
-        default=False,
-        const=True,
+        action='store_true',
         help="whether challonge accounts should be "
         "associated with the amateur bracket entrants. "
         "This will invite their Challonge account to "

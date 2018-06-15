@@ -44,9 +44,9 @@ def _sort_by_seeds(values, seeds):
 
 
 if __name__ == "__main__":
-    # Argument parsing.
     argparser = argparse.ArgumentParser(
-        description="Seeds a tournament on Challonge from gaR PR rankings."
+        description="Seeds a tournament on Challonge from gaR PR rankings.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     argparser.add_argument(
         "tourney_name",
@@ -69,19 +69,13 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "--shuffle",
-        nargs="?",
-        type=util.str_to_bool,
-        default=False,
-        const=True,
+        action='store_true',
         help="shuffles the seeds after seeding with gaR PR",
     )
     argparser.add_argument(
         "--print_only",
-        nargs="?",
-        type=util.str_to_bool,
-        default=False,
-        const=True,
-        help="just prints the seeds without changing the " "tournament",
+        action='store_true',
+        help="just prints the seeds without changing the tournament",
     )
     args = argparser.parse_args()
 
