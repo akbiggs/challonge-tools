@@ -56,5 +56,7 @@ if __name__ == "__main__":
     print("Bracket: https://challonge.com/{}".format(tourney_name))
 
     # TODO(timkovich): Using sheets API
+    # https://developers.google.com/sheets/api/quickstart/python
+    # 0. Auth
     # 1. Insert new row
     # 2. Insert the above values into that row
