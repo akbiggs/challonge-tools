@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
+"""
+Get the results a Challonge tournament and use the information to update
+the Smash results spreadsheet.
+
+"""
 import argparse
 import challonge
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 import re
 import sys
 
@@ -41,7 +48,7 @@ if __name__ == "__main__":
         if rank in {1, 2, 3}:
             top_3[rank-1] = util_challonge.get_participant_name(player)
 
-    # Make sure we did get the top 3 players
+    # Throw an exception if there aren't 3 players in the top 3
     if any(not p for p in top_3):
         raise Exception("Top 3 could not be found. Is the tournament over?")
 
@@ -49,14 +56,30 @@ if __name__ == "__main__":
     match = re.search(r'\d+$', tourney_name)
     weekly = match.group(0)
 
-    print("Weekly #:", weekly)
-    print("Date:", date)
-    for pl, num in zip(top_3, ["1st", "2nd", "3rd"]):
-        print("{}: {}".format(num, pl))
-    print("Bracket: https://challonge.com/{}".format(tourney_name))
+    results = []
+    results.append(weekly)
+    results.append(date)
 
-    # TODO(timkovich): Using sheets API
-    # https://developers.google.com/sheets/api/quickstart/python
-    # 0. Auth
-    # 1. Insert new row
-    # 2. Insert the above values into that row
+    for pl in top_3:
+        results.append(pl)
+
+    bracket_url = "https://challonge.com/{}".format(tourney_name)
+    results.append(bracket_url)
+
+    print('Results:', results)
+
+    # Add the results to the results spreadsheet
+
+    # Auth to access the spreadsheet
+    scope = ['https://spreadsheets.google.com/feeds',
+             'https://www.googleapis.com/auth/drive']
+
+    credentials = ServiceAccountCredentials.\
+        from_json_keyfile_name('client_secret.json', scope)
+
+    gc = gspread.authorize(credentials)
+
+    # TODO(timkovich): Move this key to the .ini file
+    SPREADSHEET_KEY = "1-foClIqQ-i8rUkdhl2jSYHUP_lj65EBNmrzaZ4R48eU"
+    wks = gc.open_by_key(SPREADSHEET_KEY).sheet1
+    wks.insert_row(results, index=2, value_input_option='USER_ENTERED')
