@@ -16,6 +16,7 @@ Pre-Reqs:
 """
 import argparse
 import challonge
+import configparser
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
@@ -27,7 +28,10 @@ import util_challonge
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
-                    description="Parse the results of a Challonge tournament.",
+                    description="Parse the results of a Challonge tournament, "
+                                "and post the results to a Google Sheet. "
+                                "Make sure to do the work in the header of "
+                                "this file before running it.",
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter
                 )
     argparser.add_argument(
@@ -42,7 +46,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--auth_json",
         default="client_secret.json",
-        help="json file to access Drive API"
+        help="OAuth JSON file to access Drive API"
     )
 
     args = argparser.parse_args()
@@ -60,18 +64,33 @@ if __name__ == "__main__":
               "download the client secret file.".format(args.auth_json))
         sys.exit(1)
 
+    config_parser = configparser.RawConfigParser()
+    config_parser.read(args.config_file)
+
+    try:
+        SPREADSHEET_KEY = config_parser.get('Sheets', 'spreadsheet_key')
+    except configparse.Error as err:
+        sys.stderr.write("Be sure to set 'spreadsheet_key' in config file: {}"
+                         .format(err))
+        sys.exit(1)
+
     tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
     tourney_info = challonge.tournaments.show(tourney_name)
     players = challonge.participants.index(tourney_name)
 
     top_3 = [0] * 3
+    num_top_3 = 0
     for player in players:
         rank = player['final_rank']
         if rank in {1, 2, 3}:
             top_3[rank-1] = util_challonge.get_participant_name(player)
+            num_top_3 += 1
+
+            if num_top_3 == 3:
+                break
 
     # Throw an exception if there aren't 3 players in the top 3
-    if any(not p for p in top_3):
+    if num_top_3 != 3:
         raise Exception("Top 3 could not be found. Is the tournament over?")
 
     date = tourney_info['started_at'].strftime('%b %e, %Y')
@@ -101,7 +120,5 @@ if __name__ == "__main__":
 
     gc = gspread.authorize(credentials)
 
-    # TODO(timkovich): Move this key to the .ini file
-    SPREADSHEET_KEY = "1-foClIqQ-i8rUkdhl2jSYHUP_lj65EBNmrzaZ4R48eU"
     wks = gc.open_by_key(SPREADSHEET_KEY).sheet1
     wks.insert_row(results, index=2, value_input_option='USER_ENTERED')
