@@ -3,6 +3,10 @@
 Get the results a Challonge tournament and use the information to update
 the Smash results spreadsheet.
 
+Pre-Reqs:
+1. Set up OAuth: https://developers.google.com/drive/api/v3/quickstart/python
+2. 
+
 """
 import argparse
 import challonge
@@ -27,6 +31,10 @@ if __name__ == "__main__":
         "--config_file",
         default=defaults.DEFAULT_CONFIG_FILENAME,
         help="the config file to read your Challonge credentials from",
+    )
+    argparser.add_argument(
+        "--auth_json",
+        help="json file to access Drive API"
     )
 
     args = argparser.parse_args()
