@@ -5,13 +5,20 @@ the Smash results spreadsheet.
 
 Pre-Reqs:
 1. Set up OAuth: https://developers.google.com/drive/api/v3/quickstart/python
-2. 
+2. Download the "My Project*.json" authentication file (this is the value for
+   the --auth_json parameter)
+3. Share the results spreadsheet with with "Edit" rights to the "client_email"
+   listed in the OAuth file. Should be "@*.iam.gserviceaccount.com".
+4. Reflect briefly on how much more work this was than typing in the results
+   by hand.
+5. Run the script
 
 """
 import argparse
 import challonge
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import os
 import re
 import sys
 
@@ -34,6 +41,7 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "--auth_json",
+        default="client_secret.json",
         help="json file to access Drive API"
     )
 
@@ -44,6 +52,12 @@ if __name__ == "__main__":
     initialized = util_challonge.\
         set_challonge_credentials_from_config(args.config_file)
     if not initialized:
+        sys.exit(1)
+
+    if not os.path.isfile(args.auth_json):
+        print("JSON authentication file '{}' not found to access Sheets.\n"
+              "Make sure you followed the OAuth steps in the header to\n"
+              "download the client secret file.".format(args.auth_json))
         sys.exit(1)
 
     tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
@@ -83,7 +97,7 @@ if __name__ == "__main__":
              'https://www.googleapis.com/auth/drive']
 
     credentials = ServiceAccountCredentials.\
-        from_json_keyfile_name('client_secret.json', scope)
+        from_json_keyfile_name(args.auth_json, scope)
 
     gc = gspread.authorize(credentials)
 
