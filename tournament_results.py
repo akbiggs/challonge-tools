@@ -21,6 +21,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 import re
+from requests.exceptions import HTTPError
 import sys
 
 import defaults
@@ -35,8 +36,9 @@ if __name__ == "__main__":
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter
                 )
     argparser.add_argument(
-        "tourney_name",
-        help="the name of the tourney to create an amateur bracket for",
+        "tourney_num_file",
+        default='TOURNEY_NUM',
+        help="file containing what tournament we're on",
     )
     argparser.add_argument(
         "--config_file",
@@ -44,7 +46,7 @@ if __name__ == "__main__":
         help="the config file to read your Challonge credentials from",
     )
     argparser.add_argument(
-        "--auth_json",
+        "--oauth",
         default="client_secret.json",
         help="OAuth JSON file to access Drive API"
     )
@@ -58,10 +60,10 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    if not os.path.isfile(args.auth_json):
+    if not os.path.isfile(args.oauth):
         print("JSON authentication file '{}' not found to access Sheets.\n"
               "Make sure you followed the OAuth steps in the header to\n"
-              "download the client secret file.".format(args.auth_json))
+              "download the client secret file.".format(args.oauth))
         sys.exit(1)
 
     config_parser = configparser.RawConfigParser()
@@ -74,8 +76,18 @@ if __name__ == "__main__":
                          .format(err))
         sys.exit(1)
 
-    tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
-    tourney_info = challonge.tournaments.show(tourney_name)
+    # Read previous tournament number
+    with open(args.tourney_num_file) as f:
+        TOURNEY_NUM = int(f.read()) + 1
+
+    tourney_name = "mtvmelee{}".format(TOURNEY_NUM)
+
+    try:
+        tourney_info = challonge.tournaments.show(tourney_name)
+    except HTTPError:
+        sys.stderr.write("Couldn't find tournament: {}\n".format(tourney_name))
+        sys.exit(1)
+
     players = challonge.participants.index(tourney_name)
 
     top_3 = [0] * 3
@@ -122,3 +134,6 @@ if __name__ == "__main__":
 
     wks = gc.open_by_key(SPREADSHEET_KEY).sheet1
     wks.insert_row(results, index=2, value_input_option='USER_ENTERED')
+
+    with open(args.tourney_num_file, "w") as f:
+        f.write(str(TOURNEY_NUM))
