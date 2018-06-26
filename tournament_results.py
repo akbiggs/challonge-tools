@@ -6,7 +6,7 @@ the Smash results spreadsheet.
 Pre-Reqs:
 1. Set up OAuth: https://developers.google.com/drive/api/v3/quickstart/python
 2. Download the "My Project*.json" authentication file (this is the value for
-   the --auth_json parameter)
+   the --oauth parameter)
 3. Share the results spreadsheet with with "Edit" rights to the "client_email"
    listed in the OAuth file. Should be "@*.iam.gserviceaccount.com".
 4. Reflect briefly on how much more work this was than typing in the results
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     argparser.add_argument(
         "--oauth",
         default="client_secret.json",
-        help="OAuth JSON file to access Drive API"
+        help="OAuth JSON file to access the Drive API"
     )
 
     args = argparser.parse_args()
