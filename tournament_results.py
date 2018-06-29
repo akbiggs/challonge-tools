@@ -128,7 +128,7 @@ if __name__ == "__main__":
              'https://www.googleapis.com/auth/drive']
 
     credentials = ServiceAccountCredentials.\
-        from_json_keyfile_name(args.auth_json, scope)
+        from_json_keyfile_name(args.oauth, scope)
 
     gc = gspread.authorize(credentials)
 
