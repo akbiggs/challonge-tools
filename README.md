@@ -98,8 +98,8 @@ Tournament updated; see seeds at http://challonge.com/32w50dxc/participants.
 
 Flags:
 
-* `--region=googlemtv`: The region being used to get gaR PR rankings. Default:
-  `googlemtv`
+* `--region=norcal`: The region being used to get gaR PR rankings. Default:
+  `norcal`
 * `--print_only=False`: Set this to `True` if you just want to print out the
   new seeds without committing them to the tournament. This is useful for
   testing before you reseed your tournament. Default: `False`
