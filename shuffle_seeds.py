@@ -175,7 +175,10 @@ def get_shuffled_seeds(num_participants):
 
 
 if __name__ == "__main__":
-    argparser = argparse.ArgumentParser()
+    argparser = argparse.ArgumentParser(
+        description="shuffles seeds while preserving project placement",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     argparser.add_argument(
         "participants",
         help="either a number of participants or " "comma-separated participant names",
