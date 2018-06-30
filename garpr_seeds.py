@@ -121,7 +121,8 @@ def get_garpr_ranks(names, region):
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
-        description="Generates seeds for a tournament from gaR PR rankings."
+        description="Generates seeds for a tournament from gaR PR rankings.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     argparser.add_argument("names", help="the names of the players to seed")
     argparser.add_argument(
