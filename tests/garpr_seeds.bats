@@ -28,3 +28,9 @@ garpr_seeds="./garpr_seeds.py"
   weird_case="$($garpr_seeds 'nMw, UMARTH, dKuO')"
   assert_equal "$correct_case" "$weird_case"
 }
+
+@test "$garpr_seeds works with the Google MTV Region" {
+  run $garpr_seeds --region=googlemtv "Eden, Bryan, Admiral"
+  assert_success
+  assert_line --regexp "^\[[1-3], [1-3], [1-3]\]$"
+}
