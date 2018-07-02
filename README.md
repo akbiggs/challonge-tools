@@ -9,7 +9,7 @@ repository.
 
 # Example workflow
 
-```
+```sh
 # After creating a local tourney at https://challonge.com/mtvmelee77,
 # I want to seed participants based on their Google MTV gaR PR rankings, and shuffle
 # the bracket a bit while preserving each participant's projected placement.
