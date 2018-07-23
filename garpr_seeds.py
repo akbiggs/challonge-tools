@@ -4,6 +4,7 @@
 import argparse
 import challonge
 import itertools
+import re
 import requests
 
 import defaults
@@ -50,8 +51,20 @@ def _find_ranking_for_name(name, rankings):
       The ranking object that corresponds to that user, or None if no
       ranking already exists.
     """
+    name = name.lower()
+
+    # GarPR handles multiple tags with either "Tag / OtherTag" or
+    # "Tag (OtherTag).
+    if "/" in name:
+        names = {name.split(" / ")}
+    elif "(" in name:
+        m = re.search("(.*)\s+\((.*)\)", name)
+        names = {m.group(1), m.group(2)}
+    else:
+        names = {name}
+
     for ranking in rankings:
-        if ranking["name"].lower() == name.lower():
+        if ranking["name"].lower() in names:
             return ranking
     return None
 

@@ -18,7 +18,7 @@ unique string identifying your tournament in the challonge.com URL, e.g.
 for http://challonge.com/mtvmelee72 it would be "mtvmelee72".
 
   2. python create_amateur_bracket.py <my_tournament_name> \
-         --use_double_elimination=False
+         --single_elimination
 
 Offers to create an amateur bracket with single elimination.
 
@@ -137,7 +137,7 @@ def _get_num_amateurs(num_participants, cutoff):
 # easy if I want to make a GUI out of this in the future. Clean up my act.
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Create amateur brackets.",
-                                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     argparser.add_argument(
         "tourney_name",
         help="the name of the tourney to create an amateur " "bracket for",
@@ -150,13 +150,9 @@ if __name__ == "__main__":
         "longer qualified for amateur bracket",
     )
     argparser.add_argument(
-        "--use_double_elimination",
-        nargs="?",
-        type=util.str_to_bool,
-        default=True,
-        const=True,
-        help="whether the amateur bracket should use double "
-        "elimination or single elimination",
+        "--single_elimination",
+        action="store_true",
+        help="use single elimination for the amateur bracket",
     )
     argparser.add_argument(
         "--config_file",
@@ -193,10 +189,10 @@ if __name__ == "__main__":
     amateur_tourney_title = tourney_title + " Amateur's Bracket"
     amateur_tourney_name = tourney_name + "_amateur"
     amateur_tourney_url = "http://challonge.com/{0}".format(amateur_tourney_name)
-    if args.use_double_elimination:
-        amateur_tourney_type = "double elimination"
-    else:
+    if args.single_elimination:
         amateur_tourney_type = "single elimination"
+    else:
+        amateur_tourney_type = "double elimination"
 
     # Make sure the tournament doesn't already exist.
     existing_amateur_tournament = util_challonge.get_tourney_info(amateur_tourney_name)
