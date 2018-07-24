@@ -1,9 +1,0 @@
-(Make sure you entered your information into settings!)
-
-# Seed tournament using gaR PR rankings.
-
-Tournament Name (Create this on Challonge, then paste its name here)
-[tourney_name]
-
-Shuffle seeds while maintaining projected bracket
-[checkbox: true/false]
