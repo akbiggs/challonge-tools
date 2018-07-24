@@ -1,0 +1,14 @@
+Amateur Bracket Generator
+
+Main Tournament
+[tourney_name]
+
+Who qualifies for amateur bracket?
+[dropdown: loser's round 1-3]
+
+Randomize seeding? (If unchecked, will use seeding from main bracket)
+[dropdown]
+
+Single or double elimination?
+[dropdown: single, double]
+
