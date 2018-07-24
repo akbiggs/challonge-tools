@@ -28,7 +28,9 @@ import util_challonge
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
-        description="Shuffles seeds in a Challonge bracket."
+        description="shuffles seeds in a Challonge bracket, preserving "
+        "projected placement",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     argparser.add_argument(
         "tourney_name",

@@ -7,6 +7,26 @@ for Super Smash Bros. Melee).
 All examples are assumed to be run from a downloaded version of this
 repository.
 
+# Example workflow
+
+```sh
+# After creating a local tourney at https://challonge.com/mtvmelee77,
+# I want to seed participants based on their Google MTV gaR PR rankings, and shuffle
+# the bracket a bit while preserving each participant's projected placement.
+python3 garpr_seeds_challonge.py mtvmelee77 --shuffle --region=googlemtv
+
+# Then later on in the local, after loser's round 2 has finished, I want
+# to create an amateur bracket automatically, so I don't have to spend time
+# manually entering in each participant.
+python3 create_amateur_bracket.py mtvmelee77
+
+# Once that amateur bracket is created, it's available at
+# https://challonge.com/mtvmelee77_amateur. The amateur bracket will use the
+# same seedings as the original bracket by default, but I want to vary up the
+# matches, so I run shuffled gaR PR seeds on the bracket again.
+python3 garpr_seeds_challonge.py mtvmelee77_amateur --shuffle --region=googlemtv
+```
+
 # Index
 
 * [Get Started](https://github.com/akbiggs/challonge-tools#get-started)
@@ -24,11 +44,11 @@ These scripts use [Python 3](https://www.python.org/downloads/), and are incompa
 with Python 2. If you run into any issues setting this up, feel free to [open
 up a new issue here](https://github.com/akbiggs/challonge-tools/issues).
 
-1. Clone and enter the repository.
+1. Clone and enter the repository from your terminal using Git.
 
 ```
-$ git clone https://github.com/akbiggs/challonge-tools
-$ cd challonge-tools
+git clone https://github.com/akbiggs/challonge-tools
+cd challonge-tools
 ```
 
 2. **(Recommended):** Create and activate a new Python virtual environment.
@@ -42,16 +62,16 @@ source challonge_tools_env/bin/activate
 3. Install python package dependencies.
 
 ```
-$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-4. Edit [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
+4. Edit your local copy of [challonge.ini](https://github.com/akbiggs/challonge-tools/blob/master/challonge.ini)
    with your Challonge username and [API key](https://challonge.com/settings/developer).
 
 5. Run the script you want to try!
 
 ```
-$ python3 <script_to_run>.py
+python3 <script_to_run>.py
 ```
 
 # gaR PR Seeds (with Challonge)
@@ -78,8 +98,8 @@ Tournament updated; see seeds at http://challonge.com/32w50dxc/participants.
 
 Flags:
 
-* `--region=googlemtv`: The region being used to get gaR PR rankings. Default:
-  `googlemtv`
+* `--region=norcal`: The region being used to get gaR PR rankings. Default:
+  `norcal`
 * `--print_only=False`: Set this to `True` if you just want to print out the
   new seeds without committing them to the tournament. This is useful for
   testing before you reseed your tournament. Default: `False`
