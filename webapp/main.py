@@ -38,7 +38,7 @@ class Page(webapp2.RequestHandler):
         """Sets a message if Challonge credentials have not been added yet."""
         if not session.get('username') or not session.get('api_key'):
             session['msg'] = ('Make sure you add your Challonge credentials '
-                              'on the "Settings" page')
+                              'on the "Settings" page.')
 
 
 class MainPage(Page):
