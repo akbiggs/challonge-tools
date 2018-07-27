@@ -1,126 +1,44 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../../../favicon.ico">
+{% extends "base.html" %}
+{% block lead %}We need your Challonge credentials to create and modify brackets on your behalf. This information is <i>not</i> stored on our servers.{% endblock %}
+{% block content %}
 
-    <title>Challonge Tools | Settings</title>
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+<form method="post">
+  <div class="form-group">
+    <label for="username">Challonge Username</label>
+    <input type="text" class="form-control" name="username" id="username" placeholder="Username" value="{{username}}">
+  </div>
 
-    <!-- Font Awesome Icons -->
-    <script defer src="https://use.fontawesome.com/releases/v5.1.1/js/all.js" integrity="sha384-BtvRZcyfv4r0x/phJt9Y9HhnN5ur1Z+kZbKVgzVBAlQZX4jvAuImlIz+bG7TS00a" crossorigin="anonymous"></script>
-
-    <!-- Custom styles for this template -->
-    <link href="style.css" rel="stylesheet">
-  </head>
-
-  <body>
-
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-      <a class="navbar-brand" href="#">Challonge Tools</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav mr-auto">
-          <a class="nav-item nav-link" href="index.html">Seed Tournament</a>
-          <a class="nav-item nav-link" href="amateur.html">Create Amateur Bracket</a>
-          <a class="nav-item nav-link" href="settings.html">Settings</a>
-        </div>
-
-        <div class="my-2 my-md-0">
-          <a class="btn btn-outline-secondary" href="#">Log Out</a>
-        </div>
+  <div class="form-group">
+    <label for="api_key">Challonge API Key</label>
+    <div class="input-group">
+      <input type="password" class="form-control" name="api_key" id="api_key" placeholder="API Key" value="{{api_key}}">
+      <div class="input-group-append">
+        <button id="key_toggle" class="btn btn-outline-secondary" type="button"><i class="far fa-eye"></i></button>
       </div>
-    </nav>
-
-    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-      <h1 class="display-4">Settings</h1>
-      <!-- <p class="lead">Seed a Challonge bracket using GAR PR.</p> -->
     </div>
+    <small class="form-text text-muted">
+      Your Challonge API key from <a target="_blank" href="https://challonge.com/settings/developer">https://challonge.com/settings/developer</a>. <b>This key has all the power of your Challonge account, so treat it as you would your password.</b>
+    </small>
+  </div>
 
-    <div class="container">
-      <form>
-        <div class="form-group">
-          <label for="username">Challonge Username</label>
-          <input type="text" class="form-control" id="username" placeholder="Username">
-        </div>
+  <div class="form-group">
+    <label for="region">Region</label>
+    <select class="custom-select" id="region" name="region">
+      {% set regions = ['norcal', 'mtvmelee'] %}
+      {% for r in regions %}
+        <option value="{{r}}" {% if r == region %}selected{% endif %}>{{r}}</option>
+      {% endfor %}
+    </select>
+  </div>
 
-        <div class="form-group">
-          <label for="api_key">Challonge API Key</label>
-          <div class="input-group">
-            <input type="password" class="form-control" id="api_key" placeholder="API Key">
-            <div class="input-group-append">
-              <button id="key_toggle" class="btn btn-outline-secondary" type="button"><i class="far fa-eye"></i></button>
-            </div>
-          </div>
-          <small class="form-text text-muted">
-            Your Challonge API key from <a target="_blank" href="https://challonge.com/settings/developer">https://challonge.com/settings/developer</a>. <b>This key has all the power of your Challonge account, so treat it as you would your password.</b>
-          </small>
-        </div>
+  <button type="submit" class="btn btn-primary">Save</button>
+</form>
 
-        <div class="form-group">
-          <label for="region">Region</label>
-            <select class="custom-select" id="region">
-              <option value="norcal" selected>norcal</option>
-              <option value="mtvmelee">mtvmelee</option>
-            </select>
-        </div>
+{% endblock %}
 
-        <button type="submit" class="btn btn-primary">Save</button>
-      </form>
-
-      <!-- <footer class="pt-4 my-md-5 pt-md-5 border-top"> -->
-      <!--   <div class="row"> -->
-      <!--     <div class="col-12 col-md"> -->
-      <!--       <img class="mb-2" src="https://getbootstrap.com/assets/brand/bootstrap-solid.svg" alt="" width="24" height="24"> -->
-      <!--       <small class="d-block mb-3 text-muted">&copy; 2017-2018</small> -->
-      <!--     </div> -->
-      <!--     <div class="col-6 col-md"> -->
-      <!--       <h5>Features</h5> -->
-      <!--       <ul class="list-unstyled text-small"> -->
-      <!--         <li><a class="text-muted" href="#">Cool stuff</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Random feature</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Team feature</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Stuff for developers</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Another one</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Last time</a></li> -->
-      <!--       </ul> -->
-      <!--     </div> -->
-      <!--     <div class="col-6 col-md"> -->
-      <!--       <h5>Resources</h5> -->
-      <!--       <ul class="list-unstyled text-small"> -->
-      <!--         <li><a class="text-muted" href="#">Resource</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Resource name</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Another resource</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Final resource</a></li> -->
-      <!--       </ul> -->
-      <!--     </div> -->
-      <!--     <div class="col-6 col-md"> -->
-      <!--       <h5>About</h5> -->
-      <!--       <ul class="list-unstyled text-small"> -->
-      <!--         <li><a class="text-muted" href="#">Team</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Locations</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Privacy</a></li> -->
-      <!--         <li><a class="text-muted" href="#">Terms</a></li> -->
-      <!--       </ul> -->
-      <!--     </div> -->
-      <!--   </div> -->
-      <!-- </footer> -->
-    </div>
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+{% block js %}
+<script defer src="https://use.fontawesome.com/releases/v5.1.1/js/all.js" integrity="sha384-BtvRZcyfv4r0x/phJt9Y9HhnN5ur1Z+kZbKVgzVBAlQZX4jvAuImlIz+bG7TS00a" crossorigin="anonymous"></script>
 
 <script>
 var toggle = $('#key_toggle');
@@ -138,6 +56,4 @@ if (field.prop('type') == 'password') {
 
 });
 </script>
-
-  </body>
-</html>
+{% endblock %}
