@@ -6,6 +6,7 @@ import webapp2
 
 
 class Page(webapp2.RequestHandler):
+    """This class contains helper functions for our pages."""
     def template_render(self, html, **values):
         JINJA_ENVIRONMENT = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -34,6 +35,7 @@ class Page(webapp2.RequestHandler):
 
 
     def check_for_incomplete_settings(self, session):
+        """Sets a message if Challonge credentials have not been added yet."""
         if not session.get('username') or not session.get('api_key'):
             session['msg'] = ('Make sure you add your Challonge credentials '
                               'on the "Settings" page')
@@ -67,9 +69,7 @@ class SettingsPage(Page):
         for value in ['username', 'api_key', 'region']:
             session[value] = self.request.get(value)
 
-        session['msg'] = 'Credentials saved!'
-
-        self.template_render('settings.html', **self.session_to_args())
+        self.redirect_with_msg('settings', 'Credentials saved!')
 
 
 class AmateurPage(Page):
