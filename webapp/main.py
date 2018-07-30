@@ -7,13 +7,12 @@ import webapp2
 
 class Page(webapp2.RequestHandler):
     """This class contains helper functions for our pages."""
-    def template_render(self, html, **values):
+    def render_template(self, html, **values):
         JINJA_ENVIRONMENT = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
                 extensions=['jinja2.ext.autoescape'],
                 autoescape=True)
 
-        values['title'] = self.title
         template = JINJA_ENVIRONMENT.get_template(html)
         self.response.write(template.render(values))
 
@@ -21,47 +20,34 @@ class Page(webapp2.RequestHandler):
         get_current_session()['msg'] = msg
         self.redirect(dst)
 
+    def has_credentials(self, session):
+        """Checks if Challonge settings have been set."""
+        return session.get('username') and session.get('api_key')
 
-    def session_to_args(self):
+
+class MainPage(Page):
+    def get(self):
         session = get_current_session()
 
-        return {
+        self.render_template('index.html',
+                             title='Seed Tournament',
+                             has_credentials=self.has_credentials(session),
+                             shuffle=True)
+
+
+class SettingsPage(Page):
+    def get(self):
+        session = get_current_session()
+        args = {
             'username': session.get('username', ''),
             'api_key': session.get('api_key', ''),
             'region': session.get('region', 'norcal'),
             # Get the msg then remove it
             'msg': session.pop('msg'),
         }
-
-
-    def check_for_incomplete_settings(self, session):
-        """Sets a message if Challonge credentials have not been added yet."""
-        if not session.get('username') or not session.get('api_key'):
-            session['msg'] = ('Make sure you add your Challonge credentials '
-                              'on the "Settings" page.')
-
-
-class MainPage(Page):
-    def __init__(self, request, response):
-        super(MainPage, self).__init__(request, response)
-        self.title = 'Seed Tournament'
-
-    def get(self):
-        session = get_current_session()
-        self.check_for_incomplete_settings(session)
-
-        self.template_render('index.html',
-                             shuffle=True,
-                             msg=session.pop('msg'))
-
-
-class SettingsPage(Page):
-    def __init__(self, request, response):
-        super(SettingsPage, self).__init__(request, response)
-        self.title = 'Settings'
-
-    def get(self):
-        self.template_render('settings.html', **self.session_to_args())
+        self.render_template('settings.html',
+                             title='Settings',
+                             **args)
 
     def post(self):
         session = get_current_session()
@@ -73,16 +59,12 @@ class SettingsPage(Page):
 
 
 class AmateurPage(Page):
-    def __init__(self, request, response):
-        super(AmateurPage, self).__init__(request, response)
-        self.title = 'Create Amateur Bracket'
-
     def get(self):
         session = get_current_session()
-        self.check_for_incomplete_settings(session)
 
-        self.template_render('amateur.html',
-                             msg=session.pop('msg'),
+        self.render_template('amateur.html',
+                             title='Create Amateur Bracket',
+                             has_credentials=self.has_credentials(session),
                              losers_round=2,
                              elimination=2,
                              randomize=False)

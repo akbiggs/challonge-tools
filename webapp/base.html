@@ -32,9 +32,14 @@
       </div>
     </nav>
 
-    {% if msg is not none %}
+    {% if (msg is defined) and (msg is not none) %}
     <div class="alert alert-primary" role="alert">
       {{msg}}
+    </div>
+
+    {% elif (has_credentials is defined) and (not has_credentials) %}
+    <div class="alert alert-primary" role="alert">
+      Make sure you add your Challonge credentials on the <a href="settings">Settings</a> page.
     </div>
     {% endif %}
 
