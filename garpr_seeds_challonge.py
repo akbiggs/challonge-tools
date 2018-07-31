@@ -130,8 +130,6 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    # TODO(timkovich): Make this callable from another file, while not
-    # affecting its current behavior
     sorted_participant = seed_tournament(args.tourney_name,
                                          args.region,
                                          args.shuffle)

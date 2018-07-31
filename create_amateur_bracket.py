@@ -133,68 +133,23 @@ def _get_num_amateurs(num_participants, cutoff):
     return num_amateurs
 
 
-# TODO: This main function is a mess, and totally won't make my life
-# easy if I want to make a GUI out of this in the future. Clean up my act.
-if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(description="Create amateur brackets.",
-                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    argparser.add_argument(
-        "tourney_name",
-        help="the name of the tourney to create an amateur " "bracket for",
-    )
-    argparser.add_argument(
-        "--losers_round_cutoff",
-        type=int,
-        default=2,
-        help="the loser's round after which people are no "
-        "longer qualified for amateur bracket",
-    )
-    argparser.add_argument(
-        "--single_elimination",
-        action="store_true",
-        help="use single elimination for the amateur bracket",
-    )
-    argparser.add_argument(
-        "--config_file",
-        default=defaults.DEFAULT_CONFIG_FILENAME,
-        help="the config file to read your Challonge " "credentials from",
-    )
-    argparser.add_argument(
-        "--randomize_seeds",
-        action="store_true",
-        help="whether the seeds should be randomized in the "
-        "amateur bracket. If this is off, the same "
-        "seeds from the main bracket will be used",
-    )
-    argparser.add_argument(
-        "--associate_challonge_accounts",
-        action="store_true",
-        help="whether challonge accounts should be "
-        "associated with the amateur bracket entrants. "
-        "This will invite their Challonge account to "
-        "the tourney via email, so use responsibly.",
-    )
-    args = argparser.parse_args()
-
-    # We need to initialize our Challonge credentials before we can
-    # make any API calls.
-    initialized = util_challonge.set_challonge_credentials_from_config(args.config_file)
-    if not initialized:
-        sys.exit(1)
-
+def create_amateur_bracket(tourney_name, single_elimination=False,
+                           losers_round_cutoff=2, randomize_seeds=False,
+                           associate_challonge_accounts=False):
     # Create the info for our amateur's bracket.
-    tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
+    tourney_name = util_challonge.parse_tourney_name(tourney_name)
     tourney_info = challonge.tournaments.show(tourney_name)
     tourney_title = tourney_info["name"]
     amateur_tourney_title = tourney_title + " Amateur's Bracket"
     amateur_tourney_name = tourney_name + "_amateur"
     amateur_tourney_url = "http://challonge.com/{0}".format(amateur_tourney_name)
-    if args.single_elimination:
+    if single_elimination:
         amateur_tourney_type = "single elimination"
     else:
         amateur_tourney_type = "double elimination"
 
     # Make sure the tournament doesn't already exist.
+    # TODO(timkovich): Make this throw an exception and deal with it later
     existing_amateur_tournament = util_challonge.get_tourney_info(amateur_tourney_name)
     if existing_amateur_tournament:
         sys.stderr.write(
@@ -203,7 +158,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Get all decided loser's matches until the cutoff.
-    cutoff = args.losers_round_cutoff
+    cutoff = losers_round_cutoff
     matches = challonge.matches.index(tourney_name)
     amateur_deciding_matches = _get_losers_matches_determining_amateurs(matches, cutoff)
     num_completed_deciding_matches = sum(
@@ -213,6 +168,7 @@ if __name__ == "__main__":
 
     # If they're not all complete, we don't have enough info to create the
     # amateur bracket.
+    # TODO(timkovich): This should throw an exception as well.
     if num_completed_deciding_matches != num_amateurs:
         sys.stderr.write(
             "There are still {0} matches incomplete before loser's round {1}.\n"
@@ -230,7 +186,7 @@ if __name__ == "__main__":
     amateur_infos = (challonge.participants.show(tourney_name, x) for x in amateur_ids)
 
     # Sort them based on seeding.
-    if args.randomize_seeds:
+    if randomize_seeds:
         seed_fn = lambda x: random.random()
     else:
         seed_fn = lambda x: x[_PARAMS_SEED]
@@ -239,10 +195,10 @@ if __name__ == "__main__":
     all_amateur_params = [
         _get_params_to_create_participant(
             amateur_info,
-            associate_challonge_account=args.associate_challonge_accounts,
-            seed=(i + 1),
+            associate_challonge_account=associate_challonge_accounts,
+            seed=i,
         )
-        for i, amateur_info in enumerate(amateur_infos)
+        for i, amateur_info in enumerate(amateur_infos, 1)
     ]
 
     # Confirm with the user that this is all okay.
@@ -293,3 +249,55 @@ if __name__ == "__main__":
 
     print("Created {0} at {1}.".format(amateur_tourney_title, amateur_tourney_url))
     print("Start the amateur bracket at the above URL when you're ready!")
+
+# TODO: This main function is a mess, and totally won't make my life
+# easy if I want to make a GUI out of this in the future. Clean up my act.
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser(description="Create amateur brackets.",
+                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    argparser.add_argument(
+        "tourney_name",
+        help="the name of the tourney to create an amateur " "bracket for",
+    )
+    argparser.add_argument(
+        "--losers_round_cutoff",
+        type=int,
+        default=2,
+        help="the loser's round after which people are no "
+        "longer qualified for amateur bracket",
+    )
+    argparser.add_argument(
+        "--single_elimination",
+        action="store_true",
+        help="use single elimination for the amateur bracket",
+    )
+    argparser.add_argument(
+        "--config_file",
+        default=defaults.DEFAULT_CONFIG_FILENAME,
+        help="the config file to read your Challonge " "credentials from",
+    )
+    argparser.add_argument(
+        "--randomize_seeds",
+        action="store_true",
+        help="whether the seeds should be randomized in the "
+        "amateur bracket. If this is off, the same "
+        "seeds from the main bracket will be used",
+    )
+    argparser.add_argument(
+        "--associate_challonge_accounts",
+        action="store_true",
+        help="whether challonge accounts should be "
+        "associated with the amateur bracket entrants. "
+        "This will invite their Challonge account to "
+        "the tourney via email, so use responsibly.",
+    )
+    args = argparser.parse_args()
+
+    # We need to initialize our Challonge credentials before we can
+    # make any API calls.
+    initialized = util_challonge.set_challonge_credentials_from_config(args.config_file)
+    if not initialized:
+        sys.exit(1)
+
+    # TODO(timkovich): Make this callable
+    create_amateur_bracket()
