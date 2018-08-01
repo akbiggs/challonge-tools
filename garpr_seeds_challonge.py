@@ -83,7 +83,7 @@ def seed_tournament(tourney_name, region='', shuffle=False):
     return sorted_participants
 
 
-def update_seeds(sorted_participants):
+def update_seeds(tourney_name, sorted_participants):
     """This is a helper function to be called from the webapp."""
     for i, participant in enumerate(sorted_participants, 1):
         challonge.participants.update(tourney_name, participant["id"], seed=i)
