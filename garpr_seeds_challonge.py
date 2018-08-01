@@ -25,7 +25,9 @@ import util
 import util_challonge
 
 
-# TODO: These sys.stderr calls may need to be changed to logging calls
+class NoSuchTournamentError(Exception):
+    """Requested tournament does not exist."""
+
 
 def _sort_by_seeds(values, seeds):
     """Sorts a list of values by corresponding seed values.
@@ -51,8 +53,8 @@ def seed_tournament(tourney_name, region='', shuffle=False):
     tourney_name = util_challonge.parse_tourney_name(tourney_name)
     tourney_url = "http://challonge.com/{0}".format(tourney_name)
     if not util_challonge.get_tourney_info(tourney_name):
-        sys.stderr.write("No tourney exists at {0}.\n".format(tourney_url))
-        sys.exit(1)
+        raise NoSuchTournamentError("No tourney exists at {0}."
+                                    .format(tourney_url))
 
     # Get the seeds for the participants.
     participants = challonge.participants.index(tourney_name)

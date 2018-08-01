@@ -6,6 +6,7 @@ and make it easier for the average user to use.
 import challonge
 from datetime import timedelta
 from flask import Flask, render_template, redirect, request, flash, session
+from requests.exceptions import HTTPError
 
 import garpr_seeds_challonge
 
@@ -49,18 +50,23 @@ def main():
         tourney_name = request.form.get('tourney_name')
         shuffle = request.form.get('shuffle')
         challonge.set_credentials(session['username'], session['api_key'])
-        # TODO: Make sure this call worked.
         sorted_players = garpr_seeds_challonge.seed_tournament(
                              tourney_name,
                              region=session['region'],
                              shuffle=shuffle)
 
-        # TODO: Make sure this call worked.
-        garpr_seeds_challonge.update_seeds(tourney_name, sorted_players)
         tourney_url = "http://challonge.com/{0}".format(tourney_name)
+
+        try:
+            garpr_seeds_challonge.update_seeds(tourney_name, sorted_players)
+        except HTTPError:
+            flash("Couldn't access {} with the API, are you sure you have "
+                  "access to this bracket?".format(tourney_url), 'danger')
+            return redirect('/')
+
         flash('Your tournament has been created at <a href="{0}">{0}</a>'
               .format(tourney_url))
-        return redirect('index')
+        return redirect('/')
 
 
 @app.route('/amateur')
