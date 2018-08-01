@@ -45,7 +45,7 @@ def _sort_by_seeds(values, seeds):
     return [x[1] for x in sorted_enumerated_values]
 
 
-def seed_tournament(tourney_name, region, shuffle):
+def seed_tournament(tourney_name, region='', shuffle=False):
     """Return a list of participants sorted by seed, ascending."""
     # Make sure the tournament exists.
     tourney_name = util_challonge.parse_tourney_name(tourney_name)
@@ -130,9 +130,9 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    sorted_participant = seed_tournament(args.tourney_name,
-                                         args.region,
-                                         args.shuffle)
+    sorted_participants = seed_tournament(args.tourney_name,
+                                          args.region,
+                                          args.shuffle)
 
     for i, participant in enumerate(sorted_participants, 1):
         print(

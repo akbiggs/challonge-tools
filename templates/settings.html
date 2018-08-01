@@ -26,7 +26,7 @@
   <div class="form-group">
     <label for="region">Region</label>
     <select class="custom-select" id="region" name="region">
-      {% set regions = ['norcal', 'mtvmelee'] %}
+      {% set regions = ['norcal', 'googlemtv'] %}
       {% for r in regions %}
         <option value="{{r}}" {% if r == region %}selected{% endif %}>{{r}}</option>
       {% endfor %}
