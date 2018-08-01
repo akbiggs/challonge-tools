@@ -32,16 +32,13 @@
       </div>
     </nav>
 
-    {% if (msg is defined) and (msg is not none) %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
     <div class="alert alert-primary" role="alert">
-      {{msg}}
-    </div>
-
-    {% elif (has_credentials is defined) and (not has_credentials) %}
-    <div class="alert alert-primary" role="alert">
-      Make sure you add your Challonge credentials on the <a href="settings">Settings</a> page.
+      {{messages[0] | safe}}
     </div>
     {% endif %}
+    {% endwith %}
 
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
       <h1 class="display-4">{{title}}</h1>
