@@ -5,7 +5,8 @@ and make it easier for the average user to use.
 """
 import challonge
 from datetime import timedelta
-from flask import Flask, render_template, redirect, request, flash, session
+from flask import Flask, render_template, redirect, request, flash, session,\
+        url_for
 from requests.exceptions import HTTPError
 
 import garpr_seeds_challonge
@@ -42,18 +43,38 @@ def main():
         if needs_credentials():
             flash(settings_msg)
 
+        tourney_name = request.args.get('tourney_name', '')
+        shuffle = request.args.get('shuffle', True)
+
         return render_template('index.html',
-                               shuffle=True)
+                               tourney_name=tourney_name,
+                               shuffle=shuffle)
 
     elif request.method == 'POST':
         # TODO: Form and session error checking
         tourney_name = request.form.get('tourney_name')
         shuffle = request.form.get('shuffle')
+
+        if not tourney_name:
+            flash('Tournament name is required', 'danger')
+            return redirect(url_for('main', **params))
+
         challonge.set_credentials(session['username'], session['api_key'])
-        sorted_players = garpr_seeds_challonge.seed_tournament(
-                             tourney_name,
-                             region=session['region'],
-                             shuffle=shuffle)
+        try:
+            # TODO: Get the status messages about which players weren't
+            # found on garpr
+            sorted_players = garpr_seeds_challonge.seed_tournament(
+                                 tourney_name,
+                                 region=session['region'],
+                                 shuffle=shuffle)
+        except garpr_seeds_challonge.NoSuchTournamentError as e:
+            flash(str(e), 'warning')
+            return redirect(url_for('main', tourney_name=tourney_name))
+        except HTTPError:
+            flash('Error accessing Challonge API. Make sure your API key is '
+                  'correct.', 'danger')
+            return redirect(url_for('main', tourney_name=tourney_name))
+
 
         tourney_url = "http://challonge.com/{0}".format(tourney_name)
 
@@ -61,12 +82,14 @@ def main():
             garpr_seeds_challonge.update_seeds(tourney_name, sorted_players)
         except HTTPError:
             flash("Couldn't access {} with the API, are you sure you have "
-                  "access to this bracket?".format(tourney_url), 'danger')
-            return redirect('/')
+                  "access to this bracket?".format(tourney_url), 'warning')
+            return redirect(url_for('main', tourney_name=tourney_name))
 
-        flash('Your tournament has been created at <a href="{0}">{0}</a>'
-              .format(tourney_url))
-        return redirect('/')
+        flash('Your tournament has been seeded! Check it out '
+              '<a href="{0}">here</a> to make adjustments. Feel free to run '
+              'this again if you add more players.'
+              .format(tourney_url + '/participants'))
+        return redirect(url_for('main', tourney_name=tourney_name))
 
 
 @app.route('/amateur')
@@ -96,7 +119,7 @@ def settings():
             session[value] = request.form.get(value)
 
         flash('Credentials saved!')
-        return redirect('settings')
+        return redirect(url_for('settings'))
 
 
 @app.route('/logout')
