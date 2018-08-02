@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 This is a webapp written in Flask to access the Challonge tools backend,
 and make it easier for the average user to use.
@@ -17,6 +18,7 @@ app = Flask(__name__)
 app.secret_key = "Every Who Down in Whoville Liked Christmas a lot...  But the Grinch,Who lived just north of Whoville, Did NOT!  The Grinch hated Christmas! The whole Christmas season!  Now, please don't ask why. No one quite knows the reason.  It could be his head wasn't screwed on just right.  It could be, perhaps, that his shoes were too tight."
 app.url_map.strict_slashes = False
 
+
 @app.before_request
 def make_session_persistent():
     """
@@ -30,9 +32,11 @@ def make_session_persistent():
 settings_msg = ('Make sure you add your Challonge credentials on the '
                 '<a href="settings">Settings</a> page.')
 
+
 def needs_credentials():
     """Checks if Challonge settings have been set."""
     return not all(key in session for key in ['username', 'api_key'])
+
 
 # Make this function accessible from templates
 app.jinja_env.globals.update(needs_credentials=needs_credentials)
