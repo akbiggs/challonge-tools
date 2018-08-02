@@ -57,7 +57,7 @@ def _find_ranking_for_name(name, rankings):
         # GarPR handles multiple tags with either "Tag / OtherTag" or
         # "Tag (OtherTag).
         if "/" in garpr_name:
-            garpr_names = {garpr_name.split(" / ")}
+            garpr_names = set(garpr_name.split(" / "))
         elif "(" in garpr_name:
             m = re.search("(.*)\s+\((.*)\)", garpr_name)
             garpr_names = {m.group(1), m.group(2)}
