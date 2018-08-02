@@ -44,7 +44,7 @@ def main():
             flash(settings_msg)
 
         tourney_name = request.args.get('tourney_name', '')
-        shuffle = request.args.get('shuffle', True)
+        shuffle = request.args.get('shuffle', 'on')
 
         return render_template('index.html',
                                tourney_name=tourney_name,
@@ -52,10 +52,11 @@ def main():
 
     elif request.method == 'POST':
         # TODO: Form and session error checking
-        tourney_name = request.form.get('tourney_name')
-        shuffle = request.form.get('shuffle')
+        params = {}
+        params['tourney_name'] = request.form.get('tourney_name')
+        params['shuffle'] = request.form.get('shuffle', 'off')
 
-        if not tourney_name:
+        if not params['tourney_name']:
             flash('Tournament name is required', 'danger')
             return redirect(url_for('main', **params))
 
@@ -64,32 +65,33 @@ def main():
             # TODO: Get the status messages about which players weren't
             # found on garpr
             sorted_players = garpr_seeds_challonge.seed_tournament(
-                                 tourney_name,
+                                 params['tourney_name'],
                                  region=session['region'],
-                                 shuffle=shuffle)
+                                 shuffle=params['shuffle'])
         except garpr_seeds_challonge.NoSuchTournamentError as e:
             flash(str(e), 'warning')
-            return redirect(url_for('main', tourney_name=tourney_name))
+            return redirect(url_for('main', **params))
         except HTTPError:
             flash('Error accessing Challonge API. Make sure your API key is '
                   'correct.', 'danger')
-            return redirect(url_for('main', tourney_name=tourney_name))
+            return redirect(url_for('main', **params))
 
 
-        tourney_url = "http://challonge.com/{0}".format(tourney_name)
+        tourney_url = "http://challonge.com/{0}".format(params['tourney_name'])
 
         try:
-            garpr_seeds_challonge.update_seeds(tourney_name, sorted_players)
+            garpr_seeds_challonge.update_seeds(params['tourney_name'],
+                                               sorted_players)
         except HTTPError:
             flash("Couldn't access {} with the API, are you sure you have "
                   "access to this bracket?".format(tourney_url), 'warning')
-            return redirect(url_for('main', tourney_name=tourney_name))
+            return redirect(url_for('main', **params))
 
         flash('Your tournament has been seeded! Check it out '
               '<a href="{0}">here</a> to make adjustments. Feel free to run '
               'this again if you add more players.'
               .format(tourney_url + '/participants'))
-        return redirect(url_for('main', tourney_name=tourney_name))
+        return redirect(url_for('main', **params))
 
 
 @app.route('/amateur')
@@ -129,3 +131,6 @@ def logout():
     flash('You are logged out.')
     return redirect('settings')
 
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')
