@@ -7,9 +7,10 @@ import challonge
 from datetime import timedelta
 from flask import Flask, render_template, redirect, request, flash, session,\
         url_for
+import garpr_seeds_challonge
+import re
 from requests.exceptions import HTTPError
 
-import garpr_seeds_challonge
 
 app = Flask(__name__)
 # TODO: not this
@@ -52,12 +53,16 @@ def main():
 
     elif request.method == 'POST':
         # TODO: Form and session error checking
-        params = {}
-        params['tourney_name'] = request.form.get('tourney_name')
-        params['shuffle'] = request.form.get('shuffle', 'off')
+        params = {
+            'tourney_name': request.form.get('tourney_name'),
+            'shuffle': request.form.get('shuffle', 'off'),
+        }
 
         if not params['tourney_name']:
-            flash('Tournament name is required', 'danger')
+            flash('Tournament name is required.', 'danger')
+            return redirect(url_for('main', **params))
+        elif not re.match('\w+$', params['tourney_name']):
+            flash('Invalid tournament name.', 'danger')
             return redirect(url_for('main', **params))
 
         challonge.set_credentials(session['username'], session['api_key'])
@@ -75,7 +80,6 @@ def main():
             flash('Error accessing Challonge API. Make sure your API key is '
                   'correct.', 'danger')
             return redirect(url_for('main', **params))
-
 
         tourney_url = "http://challonge.com/{0}".format(params['tourney_name'])
 
