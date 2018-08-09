@@ -52,19 +52,19 @@ def _find_ranking_for_name(name, rankings):
       ranking already exists.
     """
     name = name.lower()
-
-    # GarPR handles multiple tags with either "Tag / OtherTag" or
-    # "Tag (OtherTag).
-    if "/" in name:
-        names = {name.split(" / ")}
-    elif "(" in name:
-        m = re.search("(.*)\s+\((.*)\)", name)
-        names = {m.group(1), m.group(2)}
-    else:
-        names = {name}
-
     for ranking in rankings:
-        if ranking["name"].lower() in names:
+        garpr_name = ranking["name"].lower()
+        # GarPR handles multiple tags with either "Tag / OtherTag" or
+        # "Tag (OtherTag).
+        if "/" in garpr_name:
+            garpr_names = set(garpr_name.split(" / "))
+        elif "(" in garpr_name:
+            m = re.search("(.*)\s+\((.*)\)", garpr_name)
+            garpr_names = {m.group(1), m.group(2)}
+        else:
+            garpr_names = {garpr_name}
+
+        if name in garpr_names:
             return ranking
     return None
 
