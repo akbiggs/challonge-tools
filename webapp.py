@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 This is a webapp written in Flask to access the Challonge tools backend,
 and make it easier for the average user to use.
@@ -8,9 +8,12 @@ import challonge
 from datetime import timedelta
 from flask import Flask, render_template, redirect, request, flash, session,\
         url_for
-import garpr_seeds_challonge
 import re
 from requests.exceptions import HTTPError
+
+from create_amateur_bracket import create_amateur_bracket,\
+        MainTournamentNotFarEnoughAlong, AmateurBracketAlreadyExists
+import garpr_seeds_challonge
 
 
 app = Flask(__name__)
@@ -42,6 +45,14 @@ def needs_credentials():
 app.jinja_env.globals.update(needs_credentials=needs_credentials)
 
 
+def valid_tourney_name(name):
+    if not name:
+        return False, 'Tournament name is required.'
+    elif not re.match('\w+$', name):
+        return False, 'Invalid tournament name.'
+
+    return True, ''
+
 @app.route('/', methods=['GET', 'POST'])
 def main():
     if request.method == 'GET':
@@ -62,11 +73,10 @@ def main():
             'shuffle': request.form.get('shuffle', 'off'),
         }
 
-        if not params['tourney_name']:
-            flash('Tournament name is required.', 'danger')
-            return redirect(url_for('main', **params))
-        elif not re.match('\w+$', params['tourney_name']):
-            flash('Invalid tournament name.', 'danger')
+        is_valid_name, err = valid_tourney_name(params['tourney_name'])
+
+        if not is_valid_name:
+            flash(err, 'danger')
             return redirect(url_for('main', **params))
 
         challonge.set_credentials(session['username'], session['api_key'])
@@ -102,15 +112,66 @@ def main():
         return redirect(url_for('main', **params))
 
 
-@app.route('/amateur')
+@app.route('/amateur', methods=['GET', 'POST'])
 def amateur():
-    if needs_credentials():
-        flash(settings_msg)
+    if request.method == 'GET':
+        if needs_credentials():
+            flash(settings_msg)
 
-    return render_template('amateur.html',
-                           losers_round=2,
-                           elimination=2,
-                           randomize=False)
+        params = {}
+        for p, default in [('tourney_name', ''),
+                           ('losers_round', 2),
+                           ('elimination', 2),
+                           ('randomize', False)]:
+            params[p] = request.args.get(p, default)
+
+        app.logger.info(params)
+
+        return render_template('amateur.html', **params)
+
+    elif request.method == 'POST':
+        params = {}
+        for p in ['tourney_name', 'losers_round', 'elimination', 'randomize']:
+            value = request.form.get(p)
+
+            if p in {'losers_round', 'elimination'}:
+                value = int(value)
+
+            params[p] = value
+
+        is_valid_name, err = valid_tourney_name(params['tourney_name'])
+
+        # TODO: amateur page takes GET params
+        if not is_valid_name:
+            flash(err, 'danger')
+            return redirect(url_for('amateur', **params))
+
+        # if any(p is None for p in params):
+        #     # TODO: error checking
+        #     pass
+
+        challonge.set_credentials(session['username'], session['api_key'])
+
+        try:
+            amateur_tourney_url = create_amateur_bracket(
+                params['tourney_name'],
+                single_elimination=params['elimination'] == 1,
+                losers_round_cutoff=params['losers_round'],
+                randomize_seeds=params['randomize'])
+
+        except AmateurBracketAlreadyExists:
+            flash('Amateur bracket for this tournament already exists.',
+                  'danger')
+            return redirect(url_for('amateur', **params))
+
+        except MainTournamentNotFarEnoughAlong:
+            flash("Main tournament is not far enough along in the loser's "
+                  "bracket to create amateur bracket yet.", 'warning')
+            return redirect(url_for('amateur', **params))
+
+        flash('Your tournament amateur bracket has been created! '
+              '<a href="{0}">{0}</a>'.format(amateur_tourney_url))
+        return redirect(url_for('amateur', **params))
 
 
 @app.route('/settings', methods=['GET', 'POST'])

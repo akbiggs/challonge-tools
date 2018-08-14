@@ -5,7 +5,7 @@
 <form method="post">
   <div class="form-group">
     <label for="username">Main Tournament Name</label>
-    <input type="text" class="form-control" id="tourney_name" placeholder="Main Tournament Name" name="tourney_name">
+    <input type="text" class="form-control" id="tourney_name" placeholder="Main Tournament Name" name="tourney_name" value="{{tourney_name}}">
     <small id="tourney_help" class="form-text text-muted">Name of the Challonge tournament to create an amateur bracket for. This is the name at the end of the
       URL for your tournament, e.g. challonge.com/<b>mtvmelee77</b>.
     </small>
@@ -26,8 +26,9 @@
   <div class="form-group">
     <label for="elimination">Single or Double Elimination?</label>
     <select class="custom-select" id="elimination" name="elimination">
-      <option value="1">Single elimination</option>
-      <option value="2" selected>Double elimination</option>
+        {% for n, st in [(1, 'Single'), (2, 'Double')] %}
+          <option value="{{n}}" {% if n == elimination %}selected{% endif %}>{{st}} elimination</option>
+        {% endfor %}
     </select>
   </div>
 

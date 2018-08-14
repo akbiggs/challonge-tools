@@ -62,6 +62,14 @@ _CREDENTIALS_USER = "user"
 _CREDENTIALS_API_KEY = "api_key"
 
 
+class AmateurBracketAlreadyExists(Exception):
+    """An amateur bracket already exists for this tournament."""
+
+
+class MainTournamentNotFarEnoughAlong(Exception):
+    """Not enough loser's matches are completed to create an amateur bracket."""
+
+
 def _get_params_to_create_participant(
         participant_info, associate_challonge_account, seed):
     """Gets the params used to register a participant in a new tourney.
@@ -105,7 +113,6 @@ def _get_losers_matches_determining_amateurs(matches, cutoff):
     # So if our cutoff is at loser's round 3, we want all matches in
     # the range [-3, -1], since these are all matches that will eliminate
     # someone into amateur's bracket.
-    cutoff = args.losers_round_cutoff
     return [x for x in matches if -cutoff <= x["round"] and x["round"] <= -1]
 
 
@@ -135,7 +142,19 @@ def _get_num_amateurs(num_participants, cutoff):
 
 def create_amateur_bracket(tourney_name, single_elimination=False,
                            losers_round_cutoff=2, randomize_seeds=False,
-                           associate_challonge_accounts=False):
+                           associate_challonge_accounts=False,
+                           interactive=False):
+    """
+    Create the amateur bracket.
+
+    Most of the params are the same as their argparse counterpart.
+
+    @param interactive: If this is being run on the command line and can take
+        user input.
+
+    @returns: URL of the generated amateur bracket.
+
+    """
     # Create the info for our amateur's bracket.
     tourney_name = util_challonge.parse_tourney_name(tourney_name)
     tourney_info = challonge.tournaments.show(tourney_name)
@@ -149,13 +168,11 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
         amateur_tourney_type = "double elimination"
 
     # Make sure the tournament doesn't already exist.
-    # TODO(timkovich): Make this throw an exception and deal with it later
     existing_amateur_tournament = util_challonge.get_tourney_info(amateur_tourney_name)
     if existing_amateur_tournament:
-        sys.stderr.write(
-            "Amateur tournament already exists at " "{0}.\n".format(amateur_tourney_url)
-        )
-        sys.exit(1)
+        raise AmateurBracketAlreadyExists(
+            "Amateur tournament already exists at {}."
+            .format(amateur_tourney_url))
 
     # Get all decided loser's matches until the cutoff.
     cutoff = losers_round_cutoff
@@ -168,9 +185,8 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
 
     # If they're not all complete, we don't have enough info to create the
     # amateur bracket.
-    # TODO(timkovich): This should throw an exception as well.
     if num_completed_deciding_matches != num_amateurs:
-        sys.stderr.write(
+        raise MainTournamentNotFarEnoughAlong(
             "There are still {0} matches incomplete before loser's round {1}.\n"
             "Please wait for these matches to complete before creating the\n"
             "amateur bracket.\n"
@@ -179,7 +195,6 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
                 num_amateurs - num_completed_deciding_matches, cutoff + 1
             )
         )
-        sys.exit(1)
 
     # Gather up all the amateurs.
     amateur_ids = [match["loser_id"] for match in amateur_deciding_matches]
@@ -201,44 +216,45 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
         for i, amateur_info in enumerate(amateur_infos, 1)
     ]
 
-    # Confirm with the user that this is all okay.
-    print("I creeped your tourney at http://challonge.com/{0}...".format(tourney_name))
-    print(
-        (
-            "Here's what I think the amateur bracket should look like, taking\n"
-            "all people eliminated before Loser's Round {0}:".format(cutoff + 1)
-        )
-    )
-    print()
-    print("Title: {0}".format(amateur_tourney_title))
-    print("URL: {0}".format(amateur_tourney_url))
-    print("Elimination Type: {0}".format(amateur_tourney_type))
-    print()
-    print("Seeds:")
-    need_to_send_at_least_one_invite = any(
-        x.get(_PARAMS_CHALLONGE_USERNAME) for x in all_amateur_params
-    )
-    if need_to_send_at_least_one_invite:
-        # I really don't want people accidentally sending email invites, so
-        # we're very explicit about email invites and how to turn them off.
-        print("(to disable invites, use --associate_challonge_accounts=False)")
-    for amateur_params in all_amateur_params:
+    if interactive:
+        # Confirm with the user that this is all okay.
+        print("I creeped your tourney at http://challonge.com/{0}...".format(tourney_name))
         print(
-            "\t{0}. {1}".format(
-                amateur_params[_PARAMS_SEED], amateur_params[_PARAMS_NAME]
+            (
+                "Here's what I think the amateur bracket should look like, taking\n"
+                "all people eliminated before Loser's Round {0}:".format(cutoff + 1)
             )
         )
-        if amateur_params.get(_PARAMS_CHALLONGE_USERNAME):
-            print("\t\t- Challonge account will receive email invite.")
-    print()
-    if not util.prompt_yes_no("Is it okay to create this amateur's bracket?"):
-        print("Aw man. Alright, I'm not creating this amateur's bracket.")
-        print(random.choice(puns.AMATEUR_PUNS))
-        print(
-            "( Feel free to report bugs and request features at "
-            "https://github.com/akbiggs/challonge-tools/issues )"
+        print()
+        print("Title: {0}".format(amateur_tourney_title))
+        print("URL: {0}".format(amateur_tourney_url))
+        print("Elimination Type: {0}".format(amateur_tourney_type))
+        print()
+        print("Seeds:")
+        need_to_send_at_least_one_invite = any(
+            x.get(_PARAMS_CHALLONGE_USERNAME) for x in all_amateur_params
         )
-        sys.exit(1)
+        if need_to_send_at_least_one_invite:
+            # I really don't want people accidentally sending email invites, so
+            # we're very explicit about email invites and how to turn them off.
+            print("(to disable invites, use --associate_challonge_accounts=False)")
+        for amateur_params in all_amateur_params:
+            print(
+                "\t{0}. {1}".format(
+                    amateur_params[_PARAMS_SEED], amateur_params[_PARAMS_NAME]
+                )
+            )
+            if amateur_params.get(_PARAMS_CHALLONGE_USERNAME):
+                print("\t\t- Challonge account will receive email invite.")
+        print()
+        if not util.prompt_yes_no("Is it okay to create this amateur's bracket?"):
+            print("Aw man. Alright, I'm not creating this amateur's bracket.")
+            print(random.choice(puns.AMATEUR_PUNS))
+            print(
+                "( Feel free to report bugs and request features at "
+                "https://github.com/akbiggs/challonge-tools/issues )"
+            )
+            sys.exit(1)
 
     # We've got confirmation. Go ahead and create the amateur bracket.
     challonge.tournaments.create(
@@ -247,11 +263,15 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
     for amateur_params in all_amateur_params:
         challonge.participants.create(amateur_tourney_name, **amateur_params)
 
-    print("Created {0} at {1}.".format(amateur_tourney_title, amateur_tourney_url))
-    print("Start the amateur bracket at the above URL when you're ready!")
+    if interactive:
+        print("Created {0} at {1}.".format(amateur_tourney_title, amateur_tourney_url))
+        print("Start the amateur bracket at the above URL when you're ready!")
+
+    return amateur_tourney_url
 
 # TODO: This main function is a mess, and totally won't make my life
 # easy if I want to make a GUI out of this in the future. Clean up my act.
+# Nobody talks to my Alex like that. Least of all Alex.
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Create amateur brackets.",
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -299,5 +319,14 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    # TODO(timkovich): Make this callable
-    create_amateur_bracket()
+    try:
+        create_amateur_bracket(
+            args.tourney_name,
+            single_elimination=args.single_elimination,
+            losers_round_cutoff=args.losers_round_cutoff,
+            randomize_seeds=args.randomize_seeds,
+            associate_challonge_accounts=args.associate_challonge_accounts,
+            interactive=True
+        )
+    except (AmateurBracketAlreadyExists, MainTournamentNotFarEnoughAlong) as e:
+        print(e)
