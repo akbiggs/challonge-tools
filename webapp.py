@@ -118,30 +118,26 @@ def amateur():
         if needs_credentials():
             flash(settings_msg)
 
-        params = {}
-        for p, default in [('tourney_name', ''),
-                           ('losers_round', 2),
-                           ('elimination', 2),
-                           ('randomize', False)]:
-            params[p] = request.args.get(p, default)
+        default_params = {
+            'tourney_name': '',
+            'losers_round': 2,
+            'elimination': 2,
+            'randomize': False
+        }
 
-        app.logger.info(params)
+        params = {}
+        for p, default in default_params.items():
+            params[p] = request.args.get(p, default)
 
         return render_template('amateur.html', **params)
 
     elif request.method == 'POST':
         params = {}
         for p in ['tourney_name', 'losers_round', 'elimination', 'randomize']:
-            value = request.form.get(p)
-
-            if p in {'losers_round', 'elimination'}:
-                value = int(value)
-
-            params[p] = value
+            params[p] = request.form.get(p)
 
         is_valid_name, err = valid_tourney_name(params['tourney_name'])
 
-        # TODO: amateur page takes GET params
         if not is_valid_name:
             flash(err, 'danger')
             return redirect(url_for('amateur', **params))
@@ -156,7 +152,7 @@ def amateur():
             amateur_tourney_url = create_amateur_bracket(
                 params['tourney_name'],
                 single_elimination=params['elimination'] == 1,
-                losers_round_cutoff=params['losers_round'],
+                losers_round_cutoff=int(params['losers_round']),
                 randomize_seeds=params['randomize'])
 
         except AmateurBracketAlreadyExists:
