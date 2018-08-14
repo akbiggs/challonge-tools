@@ -155,6 +155,11 @@ def amateur():
                 losers_round_cutoff=int(params['losers_round']),
                 randomize_seeds=params['randomize'])
 
+        except HTTPError:
+            flash("Couldn't find tournament: {}"
+                  .format(params['tourney_name']), 'danger')
+            return redirect(url_for('amateur', **params))
+
         except AmateurBracketAlreadyExists:
             flash('Amateur bracket for this tournament already exists.',
                   'danger')
