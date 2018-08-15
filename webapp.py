@@ -40,8 +40,16 @@ def make_session_persistent():
     app.permanent_session_lifetime = timedelta(days=7)
 
 
+def link(text, src=None):
+    """Create links for alerts."""
+    if src is None:
+        src = text
+    return ('<a href="{}" class="alert-link" target="_blank">{}</a>'
+            .format(src, text))
+
+
 settings_msg = ('Make sure you add your Challonge credentials on the '
-                '<a href="settings">Settings</a> page.')
+                '{} page.'.format(link('Settings', '/settings')))
 
 
 def needs_credentials():
@@ -98,7 +106,8 @@ def main():
         except garpr_seeds_challonge.NoSuchTournamentError as e:
             flash(str(e), 'warning')
             return redirect(url_for('main', **params))
-        except HTTPError:
+        except HTTPError as e:
+            app.logger.info(e)
             flash('Error accessing Challonge API. Make sure your API key is '
                   'correct.', 'danger')
             return redirect(url_for('main', **params))
@@ -110,13 +119,13 @@ def main():
                                                sorted_players)
         except HTTPError:
             flash("Couldn't access {} with the API, are you sure you have "
-                  "access to this bracket?".format(tourney_url), 'warning')
+                  "access to this bracket?".format(tourney_url), 'danger')
             return redirect(url_for('main', **params))
 
         flash('Your tournament has been seeded! Check it out '
-              '<a href="{0}">here</a> to make adjustments. Feel free to run '
+              '{} to make adjustments. Feel free to run '
               'this again if you add more players.'
-              .format(tourney_url + '/participants'))
+              .format(link('here', tourney_url + '/participants')))
         return redirect(url_for('main', **params))
 
 
@@ -163,11 +172,6 @@ def amateur():
                 losers_round_cutoff=int(params['losers_round']),
                 randomize_seeds=params['randomize'])
 
-        except HTTPError:
-            flash("Couldn't find tournament: {}"
-                  .format(params['tourney_name']), 'danger')
-            return redirect(url_for('amateur', **params))
-
         except AmateurBracketAlreadyExists:
             flash('Amateur bracket for this tournament already exists.',
                   'danger')
@@ -178,8 +182,23 @@ def amateur():
                   "bracket to create amateur bracket yet.", 'warning')
             return redirect(url_for('amateur', **params))
 
+        except HTTPError as e:
+            app.logger.info(e)
+            status_code = e.response.status_code
+
+            if status_code == 404:
+                flash("Couldn't find tournament: {}"
+                      .format(params['tourney_name']), 'danger')
+            elif status_code == 401:
+                flash('Error accessing Challonge API. Make sure your API key '
+                      'is correct.', 'danger')
+            else:
+                flask('Something went wrong: {} error.'.format(status_code),
+                      'danger')
+            return redirect(url_for('amateur', **params))
+
         flash('Your tournament amateur bracket has been created! '
-              '<a href="{0}">{0}</a>'.format(amateur_tourney_url))
+              '{}'.format(link(amateur_tourney_url)))
         return redirect(url_for('amateur', **params))
 
 
@@ -210,5 +229,5 @@ def logout():
     return redirect('settings')
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0')
