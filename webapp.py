@@ -6,8 +6,11 @@ and make it easier for the average user to use.
 """
 import challonge
 from datetime import timedelta
+from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, request, flash, session,\
         url_for
+from flask_sslify import SSLify
+from os.path import dirname, abspath
 import re
 from requests.exceptions import HTTPError
 
@@ -17,9 +20,13 @@ import garpr_seeds_challonge
 
 
 app = Flask(__name__)
-# TODO: not this
-app.secret_key = "Every Who Down in Whoville Liked Christmas a lot...  But the Grinch,Who lived just north of Whoville, Did NOT!  The Grinch hated Christmas! The whole Christmas season!  Now, please don't ask why. No one quite knows the reason.  It could be his head wasn't screwed on just right.  It could be, perhaps, that his shoes were too tight."
+sslify = SSLify(app)
 app.url_map.strict_slashes = False
+
+# Get SECRET_KEY from env variable
+parent_dir = dirname(dirname(abspath(__file__))), '.env'
+load_dotenv(os.path.join(parent_dir, '.env'))
+app.secret_key = os.getenv('SECRET_KEY')
 
 
 @app.before_request
