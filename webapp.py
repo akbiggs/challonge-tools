@@ -40,16 +40,22 @@ def make_session_persistent():
     app.permanent_session_lifetime = timedelta(days=7)
 
 
-def link(text, src=None):
+def link(text, src=None, new_tab=True):
     """Create links for alerts."""
     if src is None:
         src = text
-    return ('<a href="{}" class="alert-link" target="_blank">{}</a>'
-            .format(src, text))
+
+    if new_tab:
+        target = 'target="_blank"'
+    else:
+        target = ''
+
+    return ('<a href="{0}" class="alert-link" {2}>{1}</a>'
+        .format(src, text, target))
 
 
 settings_msg = ('Make sure you add your Challonge credentials on the '
-                '{} page.'.format(link('Settings', '/settings')))
+                '{} page.'.format(link('Settings', '/settings', new_tab=False)))
 
 
 def needs_credentials():
