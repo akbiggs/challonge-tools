@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, request, flash, session,\
         url_for
 from flask_sslify import SSLify
+import os
 from os.path import dirname, abspath
 import re
 from requests.exceptions import HTTPError
@@ -24,7 +25,7 @@ sslify = SSLify(app)
 app.url_map.strict_slashes = False
 
 # Get SECRET_KEY from env variable
-parent_dir = dirname(dirname(abspath(__file__))), '.env'
+parent_dir = dirname(dirname(abspath(__file__)))
 load_dotenv(os.path.join(parent_dir, '.env'))
 app.secret_key = os.getenv('SECRET_KEY')
 
