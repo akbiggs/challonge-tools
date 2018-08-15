@@ -83,7 +83,6 @@ def main():
                                shuffle=shuffle)
 
     elif request.method == 'POST':
-        # TODO: Form and session error checking
         params = {
             'tourney_name': request.form.get('tourney_name'),
             'shuffle': request.form.get('shuffle', 'off'),
@@ -159,10 +158,6 @@ def amateur():
             flash(err, 'danger')
             return redirect(url_for('amateur', **params))
 
-        # if any(p is None for p in params):
-        #     # TODO: error checking
-        #     pass
-
         challonge.set_credentials(session['username'], session['api_key'])
 
         try:
@@ -177,9 +172,11 @@ def amateur():
                   'danger')
             return redirect(url_for('amateur', **params))
 
-        except MainTournamentNotFarEnoughAlong:
-            flash("Main tournament is not far enough along in the loser's "
-                  "bracket to create amateur bracket yet.", 'warning')
+        except MainTournamentNotFarEnoughAlong as e:
+            flash("The main tournament is not far enough along in the loser's "
+                  "bracket to create amateur bracket yet. "
+                  "There are {} matches remaining."
+                  .format(e.matches_remaining), 'warning')
             return redirect(url_for('amateur', **params))
 
         except HTTPError as e:
