@@ -125,7 +125,7 @@ def main():
         flash('Your tournament has been seeded! Check it out '
               '{} to make adjustments. Feel free to run '
               'this again if you add more players.'
-              .format(link('here', tourney_url + '/participants')))
+              .format(link('here', tourney_url + '/participants')), 'success')
         return redirect(url_for('main', **params))
 
 
@@ -196,7 +196,7 @@ def amateur():
             return redirect(url_for('amateur', **params))
 
         flash('Your tournament amateur bracket has been created! '
-              '{}'.format(link(amateur_tourney_url)))
+              '{}'.format(link(amateur_tourney_url)), 'success')
         return redirect(url_for('amateur', **params))
 
 
@@ -215,7 +215,7 @@ def settings():
         for value in ['username', 'api_key', 'region']:
             session[value] = request.form.get(value)
 
-        flash('Credentials saved!')
+        flash('Credentials saved!', 'success')
         return redirect(url_for('settings'))
 
 
