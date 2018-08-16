@@ -46,7 +46,7 @@ def link(text, src=None):
         src = text
 
     return ('<a href="{0}" class="alert-link">{1}</a>'
-        .format(src, text))
+            .format(src, text))
 
 
 settings_msg = ('Make sure you add your Challonge credentials on the '
@@ -65,10 +65,11 @@ app.jinja_env.globals.update(needs_credentials=needs_credentials)
 def valid_tourney_name(name):
     if not name:
         return False, 'Tournament name is required.'
-    elif not re.match('\w+$', name):
+    elif not re.match(r'\w+$', name):
         return False, 'Invalid tournament name.'
 
     return True, ''
+
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
@@ -225,6 +226,7 @@ def logout():
 
     flash('You are logged out.')
     return redirect('settings')
+
 
 @app.route('/privacy')
 def privacy():
