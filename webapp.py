@@ -8,7 +8,7 @@ import challonge
 from datetime import timedelta
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, request, flash, session,\
-        url_for
+                  url_for
 from flask_sslify import SSLify
 import os
 from os.path import dirname, abspath
@@ -24,7 +24,7 @@ app = Flask(__name__)
 sslify = SSLify(app)
 app.url_map.strict_slashes = False
 
-# Get SECRET_KEY from env variable
+# Get SECRET_KEY from .env file in parent directory
 parent_dir = dirname(dirname(abspath(__file__)))
 load_dotenv(os.path.join(parent_dir, '.env'))
 app.secret_key = os.getenv('SECRET_KEY')
@@ -41,7 +41,15 @@ def make_session_persistent():
 
 
 def link(text, src=None):
-    """Create links for alerts."""
+    """
+    Create links for alerts.
+
+    @param text: Link text.
+    @param src: URL link points to. Set to 'text' if omitted.
+
+    @returns: HTML for link.
+    """
+
     if src is None:
         src = text
 
@@ -68,7 +76,7 @@ def valid_tourney_name(name):
     elif not re.match(r'\w+$', name):
         return False, 'Invalid tournament name.'
 
-    return True, ''
+    return True, None
 
 
 @app.route('/', methods=['GET', 'POST'])
