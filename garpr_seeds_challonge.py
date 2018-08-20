@@ -46,7 +46,7 @@ def _sort_by_seeds(values, seeds):
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
         description="Seeds a tournament on Challonge from gaR PR rankings.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     argparser.add_argument(
         "tourney_name",
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     for i, participant in enumerate(participants):
         if ranks[i] == garpr_seeds.UNKNOWN_RANK:
             print(
-                "Could not find gaR PR info for {0}, seeding {1}".format(
+                "Could not find gaR PR info for {0}, seeding {1}\n".format(
                     participant_names[i], new_seeds[i]
                 ),
                 end=" ",

@@ -4,6 +4,7 @@
 import argparse
 import challonge
 import itertools
+import re
 import requests
 
 import defaults
@@ -50,8 +51,20 @@ def _find_ranking_for_name(name, rankings):
       The ranking object that corresponds to that user, or None if no
       ranking already exists.
     """
+    name = name.lower()
     for ranking in rankings:
-        if ranking["name"].lower() == name.lower():
+        garpr_name = ranking["name"].lower()
+        # GarPR handles multiple tags with either "Tag / OtherTag" or
+        # "Tag (OtherTag).
+        if "/" in garpr_name:
+            garpr_names = set(garpr_name.split(" / "))
+        elif "(" in garpr_name:
+            m = re.search("(.*)\s+\((.*)\)", garpr_name)
+            garpr_names = {m.group(1), m.group(2)}
+        else:
+            garpr_names = {garpr_name}
+
+        if name in garpr_names:
             return ranking
     return None
 
@@ -121,7 +134,8 @@ def get_garpr_ranks(names, region):
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
-        description="Generates seeds for a tournament from gaR PR rankings."
+        description="Generates seeds for a tournament from gaR PR rankings.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     argparser.add_argument("names", help="the names of the players to seed")
     argparser.add_argument(
