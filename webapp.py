@@ -148,7 +148,8 @@ def amateur():
             'tourney_name': '',
             'losers_round': 2,
             'elimination': 2,
-            'randomize': False
+            'randomize': False,
+            'incomplete': False
         }
 
         params = {}
@@ -159,7 +160,8 @@ def amateur():
 
     elif request.method == 'POST':
         params = {}
-        for p in ['tourney_name', 'losers_round', 'elimination', 'randomize']:
+        for p in ['tourney_name', 'losers_round', 'elimination', 'randomize',
+                  'incomplete']:
             params[p] = request.form.get(p)
 
         is_valid_name, err = valid_tourney_name(params['tourney_name'])
@@ -175,7 +177,8 @@ def amateur():
                 params['tourney_name'],
                 single_elimination=params['elimination'] == 1,
                 losers_round_cutoff=int(params['losers_round']),
-                randomize_seeds=params['randomize'])
+                randomize_seeds=params['randomize'],
+                incomplete=params['incomplete'])
 
         except AmateurBracketAlreadyExists:
             flash('Amateur bracket for this tournament already exists.',
@@ -185,7 +188,7 @@ def amateur():
         except MainTournamentNotFarEnoughAlong as e:
             flash("The main tournament is not far enough along in the loser's "
                   "bracket to create amateur bracket yet. "
-                  "There are {} matches remaining."
+                  "There are <b>{}</b> matches remaining."
                   .format(e.matches_remaining), 'warning')
             return redirect(url_for('amateur', **params))
 

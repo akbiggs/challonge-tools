@@ -134,19 +134,19 @@ def _get_num_amateurs(num_participants, cutoff):
     # cutoff round. The number of eliminated people at that point is the number
     # of amateurs.
     num_amateurs = 0
-    for losers_round in range(0, cutoff):
+    for _ in range(cutoff):
         num_eliminated = get_num_participants_placing_last(num_participants)
 
-        num_amateurs = num_amateurs + num_eliminated
-        num_participants = num_participants - num_eliminated
+        num_amateurs += num_eliminated
+        num_participants -= num_eliminated
 
     return num_amateurs
 
 
-def create_amateur_bracket(tourney_name, single_elimination=False,
-                           losers_round_cutoff=2, randomize_seeds=False,
+def create_amateur_bracket(tourney_name, single_elimination,
+                           losers_round_cutoff, randomize_seeds,
                            associate_challonge_accounts=False,
-                           interactive=False):
+                           incomplete=False, interactive=False):
     """
     Create the amateur bracket.
 
@@ -200,11 +200,45 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
         )
         err.matches_remaining = num_amateurs - num_completed_deciding_matches
 
-        raise err
+        if interactive:
+            print(err)
+
+            if not incomplete:
+                print("Alternatively, we can 'approximate' the amateur\n"
+                      "bracket if you pass in the --incomplete flag.")
+                sys.exit()
+            else:
+                if not util.prompt_yes_no("Create amateur bracket anyway?"):
+                    sys.exit()
+
+        elif not incomplete:
+            raise err
 
     # Gather up all the amateurs.
-    amateur_ids = [match["loser_id"] for match in amateur_deciding_matches]
-    amateur_infos = (challonge.participants.show(tourney_name, x) for x in amateur_ids)
+    amateur_infos = []
+    for match in amateur_deciding_matches:
+        if match["state"] == "complete":
+            id = match["loser_id"]
+            player = challonge.participants.show(tourney_name, id)
+        else:
+            # If the match isn't complete, create a frankenplayer by
+            # combining the two players' tags and averaging their seed.
+
+            # TODO(timkovich): Check what the other 'state's are
+            # (e.g. 'pending')
+            id1 = match["player1_id"]
+            id2 = match["player2_id"]
+            player1 = challonge.participants.show(tourney_name, id1)
+            player2 = challonge.participants.show(tourney_name, id2)
+
+            player = player1
+            player[_PARAMS_SEED] = (player1[_PARAMS_SEED] +
+                                    player2[_PARAMS_SEED]) // 2
+            player['display_name'] = '{} / {}'.format(player1['display_name'],
+                                                      player2['display_name'])
+            player[_PARAMS_CHALLONGE_USERNAME] = None
+
+        amateur_infos.append(player)
 
     # Sort them based on seeding.
     if randomize_seeds:
@@ -217,9 +251,8 @@ def create_amateur_bracket(tourney_name, single_elimination=False,
         _get_params_to_create_participant(
             amateur_info,
             associate_challonge_account=associate_challonge_accounts,
-            seed=i,
-        )
-        for i, amateur_info in enumerate(amateur_infos, 1)
+            seed=i
+        ) for i, amateur_info in enumerate(amateur_infos, 1)
     ]
 
     if interactive:
@@ -310,6 +343,12 @@ if __name__ == "__main__":
         "seeds from the main bracket will be used",
     )
     argparser.add_argument(
+        "--incomplete",
+        action="store_true",
+        help="create the amateur bracket before the main bracket has "
+        "fully completed."
+    )
+    argparser.add_argument(
         "--associate_challonge_accounts",
         action="store_true",
         help="whether challonge accounts should be "
@@ -332,6 +371,7 @@ if __name__ == "__main__":
             losers_round_cutoff=args.losers_round_cutoff,
             randomize_seeds=args.randomize_seeds,
             associate_challonge_accounts=args.associate_challonge_accounts,
+            incomplete=args.incomplete,
             interactive=True
         )
     except (AmateurBracketAlreadyExists, MainTournamentNotFarEnoughAlong) as e:
