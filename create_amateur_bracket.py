@@ -243,7 +243,7 @@ def create_amateur_bracket(tourney_name, single_elimination,
             err = MainTournamentNotFarEnoughAlong(
                 "Some loser's bracket matches don't have two players in them "
                 "yet. Cannot create amateur bracket.")
-            err.matches_remaining(num_pending_matches)
+            err.matches_remaining = num_pending_matches
             raise err
 
         amateur_infos.append(player)
