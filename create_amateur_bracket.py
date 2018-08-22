@@ -220,12 +220,9 @@ def create_amateur_bracket(tourney_name, single_elimination,
         if match["state"] == "complete":
             id = match["loser_id"]
             player = challonge.participants.show(tourney_name, id)
-        else:
+        elif match["state"] == "open":
             # If the match isn't complete, create a frankenplayer by
             # combining the two players' tags and averaging their seed.
-
-            # TODO(timkovich): Check what the other 'state's are
-            # (e.g. 'pending')
             id1 = match["player1_id"]
             id2 = match["player2_id"]
             player1 = challonge.participants.show(tourney_name, id1)
@@ -237,6 +234,17 @@ def create_amateur_bracket(tourney_name, single_elimination,
             player['display_name'] = '{} / {}'.format(player1['display_name'],
                                                       player2['display_name'])
             player[_PARAMS_CHALLONGE_USERNAME] = None
+        else:
+            # We can't create an amateur bracket if any of the loser's matches'
+            # state is 'pending'.
+            num_pending_matches = sum(
+                1 for x in amateur_deciding_matches if x["state"] == "pending"
+            )
+            err = MainTournamentNotFarEnoughAlong(
+                "Some loser's bracket matches don't have two players in them "
+                "yet. Cannot create amateur bracket.")
+            err.matches_remaining(num_pending_matches)
+            raise err
 
         amateur_infos.append(player)
 
@@ -252,7 +260,8 @@ def create_amateur_bracket(tourney_name, single_elimination,
             amateur_info,
             associate_challonge_account=associate_challonge_accounts,
             seed=i
-        ) for i, amateur_info in enumerate(amateur_infos, 1)
+        )
+        for i, amateur_info in enumerate(amateur_infos, 1)
     ]
 
     if interactive:
@@ -308,8 +317,6 @@ def create_amateur_bracket(tourney_name, single_elimination,
 
     return amateur_tourney_url
 
-# TODO: This main function is a mess, and totally won't make my life
-# easy if I want to make a GUI out of this in the future. Clean up my act.
 # Nobody talks to my Alex like that. Least of all Alex.
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Create amateur brackets.",
