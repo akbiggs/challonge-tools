@@ -63,7 +63,7 @@ settings_msg = ('Make sure you add your Challonge credentials on the '
 
 def needs_credentials():
     """Checks if Challonge settings have been set."""
-    return not all(key in session for key in ['username', 'api_key'])
+    return not all(session.get(key) for key in ['username', 'api_key'])
 
 
 # Make this function accessible from templates
