@@ -62,12 +62,15 @@ def seed_tournament(tourney_name, region='', shuffle=False):
     ranks = garpr_seeds.get_garpr_ranks(participant_names, region)
     new_seeds = garpr_seeds.ranks_to_seeds(ranks)
 
+    players_unknown = []
     # Let the user know which participants couldn't be found.
     for i, participant in enumerate(participants):
         if ranks[i] == garpr_seeds.UNKNOWN_RANK:
+            unknown = {"name": participant_name[i], "seed": new_seeds[i]}
+            players_unknown.append(unknown)
             print(
                 "Could not find gaR PR info for {0}, seeding {1}\n".format(
-                    participant_names[i], new_seeds[i]
+                    unknown["name"], unknown["seed"]
                 ),
                 end=" ",
             )
