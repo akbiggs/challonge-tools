@@ -47,8 +47,16 @@ def _sort_by_seeds(values, seeds):
     return [x[1] for x in sorted_enumerated_values]
 
 
-def seed_tournament(tourney_name, region='', shuffle=False):
-    """Return a list of participants sorted by seed, ascending."""
+def seed_tournament(tourney_name, region, shuffle):
+    """
+    @params: same as argparse params
+
+    @returns: a tuple consisting of:
+        * List of participants sorted by seed, ascending.
+        * List of players whose rank could not be found, along with what
+            rank they were seeded.
+
+    """
     # Make sure the tournament exists.
     tourney_name = util_challonge.parse_tourney_name(tourney_name)
     tourney_url = "http://challonge.com/{0}".format(tourney_name)
@@ -62,18 +70,12 @@ def seed_tournament(tourney_name, region='', shuffle=False):
     ranks = garpr_seeds.get_garpr_ranks(participant_names, region)
     new_seeds = garpr_seeds.ranks_to_seeds(ranks)
 
-    players_unknown = []
     # Let the user know which participants couldn't be found.
-    for i, participant in enumerate(participants):
+    players_unknown = []
+    for i, _ in enumerate(participants):
         if ranks[i] == garpr_seeds.UNKNOWN_RANK:
-            unknown = {"name": participant_name[i], "seed": new_seeds[i]}
+            unknown = {"name": participant_names[i], "seed": new_seeds[i]}
             players_unknown.append(unknown)
-            print(
-                "Could not find gaR PR info for {0}, seeding {1}\n".format(
-                    unknown["name"], unknown["seed"]
-                ),
-                end=" ",
-            )
 
     # Sort the participants on Challonge. They need to be sorted
     # before updating their seed, or else the order of the seeds could get
@@ -85,7 +87,7 @@ def seed_tournament(tourney_name, region='', shuffle=False):
         shuffled_seeds = shuffle_seeds.get_shuffled_seeds(len(participants))
         sorted_participants = _sort_by_seeds(sorted_participants, shuffled_seeds)
 
-    return sorted_participants
+    return sorted_participants, players_unknown
 
 
 def update_seeds(tourney_name, sorted_participants):
@@ -135,9 +137,13 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    sorted_participants = seed_tournament(args.tourney_name,
-                                          args.region,
-                                          args.shuffle)
+    sorted_participants, unknown_players = seed_tournament(args.tourney_name,
+                                                           args.region,
+                                                           args.shuffle)
+
+    for player in unknown_players:
+        print("Could not find gaR PR info for {name}, seeding {seed}"
+              .format(**player))
 
     for i, participant in enumerate(sorted_participants, 1):
         print(

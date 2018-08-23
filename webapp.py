@@ -61,6 +61,21 @@ settings_msg = ('Make sure you add your Challonge credentials on the '
                 '{} page.'.format(link('Settings', '/settings')))
 
 
+def create_unknown_players_html(unknown_players):
+    """Return html of an unordered list to show to the user."""
+    # TODO(timkovich): I'd like to put this in the template, but I'm not sure
+    # the best way to do this.
+    if not unknown_players:
+        return ''
+
+    unknown_text = "GAR PR info not found for the following players:<ul>"
+    for player in unknown_players:
+        unknown_text += ("<li>{name}, seeding {seed}</li>".format(**player))
+    unknown_text += "</ul><hr>"
+
+    return unknown_text
+
+
 def needs_credentials():
     """Checks if Challonge settings have been set."""
     return not all(session.get(key) for key in ['username', 'api_key'])
@@ -106,12 +121,11 @@ def main():
 
         challonge.set_credentials(session['username'], session['api_key'])
         try:
-            # TODO: Get the status messages about which players weren't
-            # found on garpr
-            sorted_players = garpr_seeds_challonge.seed_tournament(
-                                 params['tourney_name'],
-                                 region=session['region'],
-                                 shuffle=params['shuffle'])
+            sorted_players, unknown_players = garpr_seeds_challonge.\
+                seed_tournament(params['tourney_name'],
+                                region=session['region'],
+                                shuffle=params['shuffle'])
+
         except garpr_seeds_challonge.NoSuchTournamentError as e:
             flash(str(e), 'warning')
             return redirect(url_for('main', **params))
@@ -131,7 +145,10 @@ def main():
                   "access to this bracket?".format(tourney_url), 'danger')
             return redirect(url_for('main', **params))
 
-        flash('Your tournament has been seeded! Check it out '
+
+        unknown_html = create_unknown_players_html(unknown_players)
+
+        flash(unknown_html + 'Your tournament has been seeded! Check it out '
               '{} to make adjustments. Feel free to run '
               'this again if you add more players.'
               .format(link('here', tourney_url + '/participants')), 'success')
