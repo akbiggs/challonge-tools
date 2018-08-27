@@ -43,3 +43,18 @@ def test_give_last_seed_to_unknown(players):
     seeds = garpr_seeds.ranks_to_seeds(rankings)
 
     assert seeds == [1, 2, 3, 4]
+
+
+def test_seed_unknowns_in_order(players):
+    """Unknown players are seeded in the order they are encountered."""
+    players.append('BLAHBLAHBLAHBLAH')
+    players.insert(2, 'BLAHBLAH')
+
+    rankings = garpr_seeds.get_garpr_ranks(players, 'norcal')
+    seeds = garpr_seeds.ranks_to_seeds(rankings)
+
+    assert seeds == [1, 2, 4, 3, 5]
+
+
+def test_ignore_case(players):
+    """Ignore case when getting seeds."""
