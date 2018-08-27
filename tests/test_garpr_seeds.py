@@ -13,15 +13,15 @@ sys.path.append(dirname(CWD))
 import garpr_seeds
 
 
-def norcal_rankings():
-    NORCAL = os.path.join(CWD, 'test_data', 'norcal_rankings.json')
-    with open(NORCAL) as data:
+def rankings(region):
+    test_file = os.path.join(CWD, 'test_data', '{}_rankings.json'.format(region))
+    with open(test_file) as data:
         return json.load(data)['ranking']
 
 
 @pytest.fixture(scope='session', autouse=True)
 def mock_garpr_request():
-    garpr_seeds._fetch_garpr_rankings = Mock(return_value=norcal_rankings())
+    garpr_seeds._fetch_garpr_rankings = Mock(return_value=rankings('norcal'))
     yield
 
 
@@ -61,7 +61,6 @@ def test_seed_unknowns_in_order(players):
 
 
 def random_case(text):
-    """Forgive me, father, for I have sinned."""
     return ''.join(getattr(c, random.choice(['lower', 'upper']))()
                    for c in text)
 
@@ -72,3 +71,22 @@ def test_ignore_case(players):
     seeds = seed_players(pLayERs)
 
     assert seeds == [1, 2, 3]
+
+
+def test_multiple_tags_slash(players):
+    """Players can have multiple tags, denoted by a '/' or '()'."""
+    players.append('jubby')
+    players.append('darkwizard123')
+    players.append('dragonslayer69')
+    seeds = seed_players(players)
+
+    assert seeds == [1, 2, 3, 6, 4, 4]
+
+
+def test_multiple_tags_parens(players):
+    """Players can have multiple tags, denoted by a '/' or '()'."""
+    garpr_seeds._fetch_garpr_rankings = Mock(return_value=rankings('googlemtv'))
+    players = ['gar', 'bryan', 'yellow yoshi', 'char', 'eden']
+    seeds = seed_players(players)
+
+    assert seeds == [1, 2, 4, 4, 3]
