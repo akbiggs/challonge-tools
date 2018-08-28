@@ -28,7 +28,7 @@ def mock_garpr_request():
 
 @pytest.fixture
 def players():
-    return ['NMW', 'Umarth', 'trock']
+    return ['Umarth', 'trock', 'NMW']
 
 
 def seed_players(players):
@@ -41,7 +41,7 @@ def test_seeding_order(players):
     """Verify the output of ranking to seeding."""
     seeds = seed_players(players)
 
-    assert seeds == [1, 2, 3]
+    assert seeds == [2, 3, 1]
 
 
 def test_give_last_seed_to_unknown(players):
@@ -49,17 +49,17 @@ def test_give_last_seed_to_unknown(players):
     players.append('BLAHBLAHBLAHBLAH')
     seeds = seed_players(players)
 
-    assert seeds == [1, 2, 3, 4]
+    assert seeds == [2, 3, 1, 4]
 
 
 def test_seed_unknowns_in_order(players):
     """Unknown players are seeded in the order they are encountered."""
-    players.append('BLAHBLAHBLAHBLAH')
     players.insert(2, 'BLAHBLAH')
+    players.append('BLAHBLAHBLAHBLAH')
 
     seeds = seed_players(players)
 
-    assert seeds == [1, 2, 4, 3, 5]
+    assert seeds == [2, 3, 4, 1, 5]
 
 
 def random_case(text):
@@ -72,7 +72,7 @@ def test_ignore_case(players):
     pLayERs = map(random_case, players)
     seeds = seed_players(pLayERs)
 
-    assert seeds == [1, 2, 3]
+    assert seeds == [2, 3, 1]
 
 
 def test_multiple_tags_slash(players):
@@ -82,13 +82,13 @@ def test_multiple_tags_slash(players):
     players.append('dragonslayer69')
     seeds = seed_players(players)
 
-    assert seeds == [1, 2, 3, 6, 4, 4]
+    assert seeds == [2, 3, 1, 6, 4, 4]
 
 
 def test_multiple_tags_parens(players):
     """Players can have multiple tags, denoted by a '/' or '()'."""
     garpr_seeds._fetch_garpr_rankings = Mock(return_value=rankings('googlemtv'))
-    players = ['gar', 'bryan', 'yellow yoshi', 'eden', 'char']
+    players = ['bryan', 'yellow yoshi', 'gar', 'char', 'twig']
     seeds = seed_players(players)
 
-    assert seeds == [1, 2, 4, 3, 4]
+    assert seeds == [2, 3, 1, 3, 5]
