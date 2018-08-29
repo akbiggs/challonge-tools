@@ -2,7 +2,7 @@ import json
 import os
 from os.path import dirname, abspath
 import pytest
-import random
+from random import choice
 import sys
 from unittest.mock import Mock
 
@@ -63,8 +63,7 @@ def test_seed_unknowns_in_order(players):
 
 
 def random_case(text):
-    choice = random.choice
-    return ''.join(getattr(c, choice(['lower', 'upper']))() for c in text)
+    return ''.join(map(lambda c: choice([c.lower, c.upper])(), text))
 
 
 def test_ignore_case(players):
