@@ -25,6 +25,10 @@ import util
 import util_challonge
 
 
+class NoSuchTournamentError(Exception):
+    """Requested tournament does not exist."""
+
+
 def _sort_by_seeds(values, seeds):
     """Sorts a list of values by corresponding seed values.
 
@@ -41,6 +45,55 @@ def _sort_by_seeds(values, seeds):
     enumerated_values = list(enumerate(values))
     sorted_enumerated_values = sorted(enumerated_values, key=lambda x: seeds[x[0]])
     return [x[1] for x in sorted_enumerated_values]
+
+
+def seed_tournament(tourney_name, region, shuffle):
+    """
+    @params: same as argparse params
+
+    @returns: a tuple consisting of:
+        * List of participants sorted by seed, ascending.
+        * List of players whose rank could not be found, along with what
+            rank they were seeded.
+
+    """
+    # Make sure the tournament exists.
+    tourney_name = util_challonge.parse_tourney_name(tourney_name)
+    tourney_url = "http://challonge.com/{0}".format(tourney_name)
+    if not util_challonge.get_tourney_info(tourney_name):
+        raise NoSuchTournamentError("No tourney exists at {0}."
+                                    .format(tourney_url))
+
+    # Get the seeds for the participants.
+    participants = challonge.participants.index(tourney_name)
+    participant_names = [util_challonge.get_participant_name(x) for x in participants]
+    ranks = garpr_seeds.get_garpr_ranks(participant_names, region)
+    new_seeds = garpr_seeds.ranks_to_seeds(ranks)
+
+    # Let the user know which participants couldn't be found.
+    players_unknown = []
+    for i, _ in enumerate(participants):
+        if ranks[i] == garpr_seeds.UNKNOWN_RANK:
+            unknown = {"name": participant_names[i], "seed": new_seeds[i]}
+            players_unknown.append(unknown)
+
+    # Sort the participants on Challonge. They need to be sorted
+    # before updating their seed, or else the order of the seeds could get
+    # disrupted from reordering as seeds are changed.
+    sorted_participants = _sort_by_seeds(participants, new_seeds)
+
+    # Shuffle the seeds to vary up the bracket a bit.
+    if shuffle:
+        shuffled_seeds = shuffle_seeds.get_shuffled_seeds(len(participants))
+        sorted_participants = _sort_by_seeds(sorted_participants, shuffled_seeds)
+
+    return sorted_participants, players_unknown
+
+
+def update_seeds(tourney_name, sorted_participants):
+    """This is a helper function to be called from the webapp."""
+    for i, participant in enumerate(sorted_participants, 1):
+        challonge.participants.update(tourney_name, participant["id"], seed=i)
 
 
 if __name__ == "__main__":
@@ -84,45 +137,20 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    # Make sure the tournament exists.
-    tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
-    tourney_url = "http://challonge.com/{0}".format(tourney_name)
-    if not util_challonge.get_tourney_info(tourney_name):
-        sys.stderr.write("No tourney exists at {0}.\n".format(tourney_url))
-        sys.exit(1)
+    sorted_participants, unknown_players = seed_tournament(args.tourney_name,
+                                                           args.region,
+                                                           args.shuffle)
 
-    # Get the seeds for the participants.
-    participants = challonge.participants.index(tourney_name)
-    participant_names = [util_challonge.get_participant_name(x) for x in participants]
-    ranks = garpr_seeds.get_garpr_ranks(participant_names, args.region)
-    new_seeds = garpr_seeds.ranks_to_seeds(ranks)
+    for player in unknown_players:
+        print("Could not find gaR PR info for {name}, seeding {seed}"
+              .format(**player))
 
-    # Let the user know which participants couldn't be found.
-    for i, participant in enumerate(participants):
-        if ranks[i] == garpr_seeds.UNKNOWN_RANK:
-            print(
-                "Could not find gaR PR info for {0}, seeding {1}\n".format(
-                    participant_names[i], new_seeds[i]
-                ),
-                end=" ",
-            )
-
-    # Sort the participants on Challonge. They need to be sorted
-    # before updating their seed, or else the order of the seeds could get
-    # disrupted from reordering as seeds are changed.
-    sorted_participants = _sort_by_seeds(participants, new_seeds)
-
-    # Shuffle the seeds to vary up the bracket a bit.
-    if args.shuffle:
-        shuffled_seeds = shuffle_seeds.get_shuffled_seeds(len(participants))
-        sorted_participants = _sort_by_seeds(sorted_participants, shuffled_seeds)
-
-    for i, participant in enumerate(sorted_participants):
+    for i, participant in enumerate(sorted_participants, 1):
         print(
-            "{0}. {1}".format(i + 1, util_challonge.get_participant_name(participant))
+            "{0}. {1}".format(i, util_challonge.get_participant_name(participant))
         )
         if not args.print_only:
-            challonge.participants.update(tourney_name, participant["id"], seed=i + 1)
+            challonge.participants.update(tourney_name, participant["id"], seed=i)
 
     if not args.print_only:
         print("Tournament updated; see seeds at {0}/participants.".format(tourney_url))
