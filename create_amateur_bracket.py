@@ -142,6 +142,49 @@ def _get_num_amateurs(num_participants, cutoff):
 
     return num_amateurs
 
+def get_amateur_participants(amateur_deciding_matches):
+    """
+    Get a the players eligible for the amateur bracket.
+
+    @returns: list of players
+    @raises MainTournamentNotFarEnoughAlong: iff main bracket still has matches
+        that need to be completed.
+
+    """
+    amateur_infos = []
+    for match in amateur_deciding_matches:
+        if match["state"] == "complete":
+            id = match["loser_id"]
+            player = challonge.participants.show(tourney_name, id)
+        elif match["state"] == "open":
+            # If the match isn't complete, create a frankenplayer by
+            # combining the two players' tags and averaging their seed.
+            id1 = match["player1_id"]
+            id2 = match["player2_id"]
+            player1 = challonge.participants.show(tourney_name, id1)
+            player2 = challonge.participants.show(tourney_name, id2)
+
+            player = player1
+            player[_PARAMS_SEED] = (player1[_PARAMS_SEED] +
+                                    player2[_PARAMS_SEED]) // 2
+            player['display_name'] = '{} / {}'.format(player1['display_name'],
+                                                      player2['display_name'])
+            player[_PARAMS_CHALLONGE_USERNAME] = None
+        else:
+            # We can't create an amateur bracket if any of the loser's matches'
+            # state is 'pending'.
+            num_pending_matches = sum(
+                1 for x in amateur_deciding_matches if x["state"] == "pending"
+            )
+            err = MainTournamentNotFarEnoughAlong(
+                "Some loser's bracket matches don't have two players in them "
+                "yet. Cannot create amateur bracket.")
+            err.matches_remaining = num_pending_matches
+            raise err
+
+        amateur_infos.append(player)
+    return amateur_info
+
 
 def create_amateur_bracket(tourney_url, single_elimination,
                            losers_round_cutoff, randomize_seeds,
@@ -164,6 +207,7 @@ def create_amateur_bracket(tourney_url, single_elimination,
     tourney_title = tourney_info["name"]
     amateur_tourney_title = tourney_title + " Amateur's Bracket"
     amateur_tourney_name = tourney_name + "_amateur"
+    amateur_tourney_url = util_challonge.tourney_name_to_url(amateur_tourney_name)
     if single_elimination:
         amateur_tourney_type = "single elimination"
     else:
@@ -172,10 +216,9 @@ def create_amateur_bracket(tourney_url, single_elimination,
     # Make sure the tournament doesn't already exist.
     existing_amateur_tournament = util_challonge.get_tourney_info(amateur_tourney_name)
     if existing_amateur_tournament:
-        # TODO(timkovich): Write the inverse for extract_tourney_name()
         raise AmateurBracketAlreadyExists(
             "Amateur tournament already exists at {}."
-            .format(amateur_tourney_name))
+            .format(amateur_tourney_url))
 
     # Get all decided loser's matches until the cutoff.
     cutoff = losers_round_cutoff
@@ -215,38 +258,7 @@ def create_amateur_bracket(tourney_url, single_elimination,
             raise err
 
     # Gather up all the amateurs.
-    amateur_infos = []
-    for match in amateur_deciding_matches:
-        if match["state"] == "complete":
-            id = match["loser_id"]
-            player = challonge.participants.show(tourney_name, id)
-        elif match["state"] == "open":
-            # If the match isn't complete, create a frankenplayer by
-            # combining the two players' tags and averaging their seed.
-            id1 = match["player1_id"]
-            id2 = match["player2_id"]
-            player1 = challonge.participants.show(tourney_name, id1)
-            player2 = challonge.participants.show(tourney_name, id2)
-
-            player = player1
-            player[_PARAMS_SEED] = (player1[_PARAMS_SEED] +
-                                    player2[_PARAMS_SEED]) // 2
-            player['display_name'] = '{} / {}'.format(player1['display_name'],
-                                                      player2['display_name'])
-            player[_PARAMS_CHALLONGE_USERNAME] = None
-        else:
-            # We can't create an amateur bracket if any of the loser's matches'
-            # state is 'pending'.
-            num_pending_matches = sum(
-                1 for x in amateur_deciding_matches if x["state"] == "pending"
-            )
-            err = MainTournamentNotFarEnoughAlong(
-                "Some loser's bracket matches don't have two players in them "
-                "yet. Cannot create amateur bracket.")
-            err.matches_remaining = num_pending_matches
-            raise err
-
-        amateur_infos.append(player)
+    amateur_infos = get_amateur_participants(amateur_deciding_matches)
 
     # Sort them based on seeding.
     if randomize_seeds:
@@ -305,9 +317,11 @@ def create_amateur_bracket(tourney_url, single_elimination,
             sys.exit(1)
 
     # We've got confirmation. Go ahead and create the amateur bracket.
+    tourney, subdomain = util_challonge.tourney_name_to_parts(amateur_tourney_name)
     challonge.tournaments.create(
-        amateur_tourney_title, amateur_tourney_name, amateur_tourney_type
-    )
+        amateur_tourney_title, tourney, amateur_tourney_type,
+        subdomain=subdomain)
+
     for amateur_params in all_amateur_params:
         challonge.participants.create(amateur_tourney_name, **amateur_params)
 
@@ -317,7 +331,6 @@ def create_amateur_bracket(tourney_url, single_elimination,
 
     return amateur_tourney_url
 
-# Nobody talks to my Alex like that. Least of all Alex.
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Create amateur brackets.",
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
