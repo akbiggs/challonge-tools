@@ -143,7 +143,7 @@ def _get_num_amateurs(num_participants, cutoff):
     return num_amateurs
 
 
-def create_amateur_bracket(tourney_url, single_elimination,
+def create_amateur_bracket(tourney_name, single_elimination,
                            losers_round_cutoff, randomize_seeds,
                            associate_challonge_accounts=False,
                            incomplete=False, interactive=False):
@@ -159,11 +159,12 @@ def create_amateur_bracket(tourney_url, single_elimination,
 
     """
     # Create the info for our amateur's bracket.
-    tourney_name = util_challonge.extract_tourney_name(tourney_url)
+    tourney_name = util_challonge.parse_tourney_name(tourney_name)
     tourney_info = challonge.tournaments.show(tourney_name)
     tourney_title = tourney_info["name"]
     amateur_tourney_title = tourney_title + " Amateur's Bracket"
     amateur_tourney_name = tourney_name + "_amateur"
+    amateur_tourney_url = "http://challonge.com/{0}".format(amateur_tourney_name)
     if single_elimination:
         amateur_tourney_type = "single elimination"
     else:
@@ -172,10 +173,9 @@ def create_amateur_bracket(tourney_url, single_elimination,
     # Make sure the tournament doesn't already exist.
     existing_amateur_tournament = util_challonge.get_tourney_info(amateur_tourney_name)
     if existing_amateur_tournament:
-        # TODO(timkovich): Write the inverse for extract_tourney_name()
         raise AmateurBracketAlreadyExists(
             "Amateur tournament already exists at {}."
-            .format(amateur_tourney_name))
+            .format(amateur_tourney_url))
 
     # Get all decided loser's matches until the cutoff.
     cutoff = losers_round_cutoff
@@ -266,7 +266,7 @@ def create_amateur_bracket(tourney_url, single_elimination,
 
     if interactive:
         # Confirm with the user that this is all okay.
-        print("I creeped your tourney at {0}...".format(tourney_name))
+        print("I creeped your tourney at http://challonge.com/{0}...".format(tourney_name))
         print(
             (
                 "Here's what I think the amateur bracket should look like, taking\n"
@@ -322,8 +322,8 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Create amateur brackets.",
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     argparser.add_argument(
-        "tourney_url",
-        help="the URL of the tourney to create an amateur bracket for",
+        "tourney_name",
+        help="the name of the tourney to create an amateur " "bracket for",
     )
     argparser.add_argument(
         "--losers_round_cutoff",
@@ -373,7 +373,7 @@ if __name__ == "__main__":
 
     try:
         create_amateur_bracket(
-            args.tourney_url,
+            args.tourney_name,
             single_elimination=args.single_elimination,
             losers_round_cutoff=args.losers_round_cutoff,
             randomize_seeds=args.randomize_seeds,

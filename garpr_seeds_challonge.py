@@ -47,7 +47,7 @@ def _sort_by_seeds(values, seeds):
     return [x[1] for x in sorted_enumerated_values]
 
 
-def seed_tournament(tourney_url, region, shuffle):
+def seed_tournament(tourney_name, region, shuffle):
     """
     @params: same as argparse params
 
@@ -58,7 +58,8 @@ def seed_tournament(tourney_url, region, shuffle):
 
     """
     # Make sure the tournament exists.
-    tourney_name = util_challonge.parse_tourney_name(tourney_url)
+    tourney_name = util_challonge.parse_tourney_name(tourney_name)
+    tourney_url = "http://challonge.com/{0}".format(tourney_name)
     if not util_challonge.get_tourney_info(tourney_name):
         raise NoSuchTournamentError("No tourney exists at {0}."
                                     .format(tourney_url))
@@ -101,13 +102,15 @@ if __name__ == "__main__":
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     argparser.add_argument(
-        "tourney_url",
-        help="the URL of the Challonge tournament to shuffle."
+        "tourney_name",
+        help="the name of the Challonge tournament to "
+        "shuffle. This is the name at the end of the "
+        "URL for your tournament",
     )
     argparser.add_argument(
         "--config_file",
         default=defaults.DEFAULT_CONFIG_FILENAME,
-        help="the config file to read your Challonge credentials from",
+        help="the config file to read your Challonge " "credentials from",
     )
     argparser.add_argument(
         "--region",
@@ -134,15 +137,13 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    sorted_participants, unknown_players = seed_tournament(args.tourney_url,
+    sorted_participants, unknown_players = seed_tournament(args.tourney_name,
                                                            args.region,
                                                            args.shuffle)
 
     for player in unknown_players:
         print("Could not find gaR PR info for {name}, seeding {seed}"
               .format(**player))
-
-    tourney_name = util_challonge.parse_tourney_name(args.tourney_url)
 
     for i, participant in enumerate(sorted_participants, 1):
         print(
