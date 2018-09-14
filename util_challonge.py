@@ -5,6 +5,7 @@
 
 
 import challonge
+import re
 import requests.exceptions
 
 from parse_challonge_credentials import safe_parse_challonge_credentials_from_config
@@ -27,19 +28,28 @@ def set_challonge_credentials_from_config(config_filename):
     return True
 
 
-def parse_tourney_name(name_or_url):
-    """Parses the URL name of the tournament from its name or URL.
-
-    Useful for sanitizing input.
-
-    Args:
-      name_or_url: Either the name at the end of a Challonge URL, or a full
-                   Challonge URL.
-
-    Returns:
-      Just the name bit at the end of a URL.
+def extract_tourney_name(url):
     """
-    return name_or_url.split("http://challonge.com/")[-1]
+    Parses the URL name of the tournament from its URL.
+
+    Extracts the subdomain (if applicable) and tourney name from URL.
+
+    @param url: URL of a Challonge tournament.
+    @returns: Name of the tournament suitable to use in the Challonge API.
+    @raises ValueError: iff the Challonge URL is invalid.
+
+    """
+    match = re.search(r'https?://(\w+)?\.?challonge.com/([^/]+)', url)
+
+    if match is None or match.group(2) is None:
+        raise ValueError('Invalid Challonge URL: {}.'.format(url))
+
+    subdomain, tourney = match.groups()
+
+    if subdomain is None:
+        return tourney
+    else:
+        return '{}-{}'.format(subdomain, tourney)
 
 
 def get_tourney_info(name):
