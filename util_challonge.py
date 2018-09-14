@@ -41,7 +41,7 @@ def extract_tourney_name(url):
     """
     match = re.match(r'(https?://)?(\w+)?\.?challonge.com/([^/]+)', url)
 
-    if match is None or match.group(2) is None:
+    if match is None or match.group(3) is None:
         raise ValueError('Invalid Challonge URL: {}.'.format(url))
 
     _, subdomain, tourney = match.groups()

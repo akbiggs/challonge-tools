@@ -85,10 +85,10 @@ def needs_credentials():
 app.jinja_env.globals.update(needs_credentials=needs_credentials)
 
 
-def valid_tourney_name(name):
+def valid_tourney_url(name):
     if not name:
         return False, 'Tournament name is required.'
-    elif not re.match(r'\w+$', name):
+    elif not re.match(r'[\w:/.]+$', name):
         return False, 'Invalid tournament name.'
 
     return True, None
@@ -100,20 +100,20 @@ def main():
         if needs_credentials():
             flash(settings_msg)
 
-        tourney_name = request.args.get('tourney_name', '')
+        tourney_url = request.args.get('tourney_url', '')
         shuffle = request.args.get('shuffle', 'on')
 
         return render_template('index.html',
-                               tourney_name=tourney_name,
+                               tourney_url=tourney_url,
                                shuffle=shuffle)
 
     elif request.method == 'POST':
         params = {
-            'tourney_name': request.form.get('tourney_name'),
+            'tourney_url': request.form.get('tourney_url'),
             'shuffle': request.form.get('shuffle', 'off'),
         }
 
-        is_valid_name, err = valid_tourney_name(params['tourney_name'])
+        is_valid_name, err = valid_tourney_url(params['tourney_url'])
 
         if not is_valid_name:
             flash(err, 'danger')
@@ -122,10 +122,13 @@ def main():
         challonge.set_credentials(session['username'], session['api_key'])
         try:
             sorted_players, unknown_players = garpr_seeds_challonge.\
-                seed_tournament(params['tourney_name'],
+                seed_tournament(params['tourney_url'],
                                 region=session['region'],
                                 shuffle=params['shuffle'])
 
+        except ValueError as e:
+            flash(str(e), 'warning')
+            return redirect(url_for('main', **params))
         except garpr_seeds_challonge.NoSuchTournamentError as e:
             flash(str(e), 'warning')
             return redirect(url_for('main', **params))
@@ -135,14 +138,14 @@ def main():
                   'correct.', 'danger')
             return redirect(url_for('main', **params))
 
-        tourney_url = "http://challonge.com/{0}".format(params['tourney_name'])
-
         try:
-            garpr_seeds_challonge.update_seeds(params['tourney_name'],
+            garpr_seeds_challonge.update_seeds(params['tourney_url'],
                                                sorted_players)
-        except HTTPError:
+        except HTTPError as e:
+            app.logger.info(e)
             flash("Couldn't access {} with the API, are you sure you have "
-                  "access to this bracket?".format(tourney_url), 'danger')
+                  "access to this bracket?".format(params['tourney_url']),
+                  'danger')
             return redirect(url_for('main', **params))
 
 
@@ -151,7 +154,8 @@ def main():
         flash(unknown_html + 'Your tournament has been seeded! Check it out '
               '{} to make adjustments. Feel free to run '
               'this again if you add more players.'
-              .format(link('here', tourney_url + '/participants')), 'success')
+              .format(link('here', params['tourney_url'] + '/participants')),
+                      'success')
         return redirect(url_for('main', **params))
 
 
@@ -162,7 +166,7 @@ def amateur():
             flash(settings_msg)
 
         default_params = {
-            'tourney_name': '',
+            'tourney_url': '',
             'losers_round': 2,
             'elimination': 2,
             'randomize': False,
@@ -177,11 +181,11 @@ def amateur():
 
     elif request.method == 'POST':
         params = {}
-        for p in ['tourney_name', 'losers_round', 'elimination', 'randomize',
+        for p in ['tourney_url', 'losers_round', 'elimination', 'randomize',
                   'incomplete']:
             params[p] = request.form.get(p)
 
-        is_valid_name, err = valid_tourney_name(params['tourney_name'])
+        is_valid_name, err = valid_tourney_url(params['tourney_url'])
 
         if not is_valid_name:
             flash(err, 'danger')
@@ -191,7 +195,7 @@ def amateur():
 
         try:
             amateur_tourney_url = create_amateur_bracket(
-                params['tourney_name'],
+                params['tourney_url'],
                 single_elimination=params['elimination'] == 1,
                 losers_round_cutoff=int(params['losers_round']),
                 randomize_seeds=params['randomize'],
@@ -215,7 +219,7 @@ def amateur():
 
             if status_code == 404:
                 flash("Couldn't find tournament: {}"
-                      .format(params['tourney_name']), 'danger')
+                      .format(params['tourney_url']), 'danger')
             elif status_code == 401:
                 flash('Error accessing Challonge API. Make sure your API key '
                       'is correct.', 'danger')
