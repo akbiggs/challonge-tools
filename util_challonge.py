@@ -54,7 +54,7 @@ def extract_tourney_name(url):
 
 def tourney_name_to_parts(name):
     """
-    Converts a tourney name into a URL.
+    Converts a tourney name into a tuple of tourney and subdomain.
 
     name is in the format subdomain-tourney or tourney.
 
@@ -82,7 +82,7 @@ def tourney_name_to_url(name):
     """
 
     tourney, subdomain = tourney_name_to_parts(name)
-    
+
     if subdomain:
         return 'https://{}.challonge.com/{}'.format(subdomain, tourney)
     else:
