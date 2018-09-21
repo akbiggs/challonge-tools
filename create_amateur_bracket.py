@@ -186,7 +186,7 @@ def get_amateur_participants(tourney_name, amateur_deciding_matches):
             raise err
 
         amateur_infos.append(player)
-    return amateur_info
+    return amateur_infos
 
 
 def create_amateur_bracket(tourney_url, single_elimination,
