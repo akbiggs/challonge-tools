@@ -142,11 +142,14 @@ def _get_num_amateurs(num_participants, cutoff):
 
     return num_amateurs
 
-def get_amateur_participants(amateur_deciding_matches):
+def get_amateur_participants(tourney_name, amateur_deciding_matches):
     """
     Get a the players eligible for the amateur bracket.
 
-    @returns: list of players
+    @params tourney_name: name of the tourney.
+    @params amateur_deciding_matches: matches that feed into the amateur
+        bracket.
+    @returns: list of players.
     @raises MainTournamentNotFarEnoughAlong: iff main bracket still has matches
         that need to be completed.
 
@@ -172,7 +175,7 @@ def get_amateur_participants(amateur_deciding_matches):
             player[_PARAMS_CHALLONGE_USERNAME] = None
         else:
             # We can't create an amateur bracket if any of the loser's matches'
-            # state is 'pending'.
+    1       # state is 'pending'.
             num_pending_matches = sum(
                 1 for x in amateur_deciding_matches if x["state"] == "pending"
             )
@@ -258,7 +261,8 @@ def create_amateur_bracket(tourney_url, single_elimination,
             raise err
 
     # Gather up all the amateurs.
-    amateur_infos = get_amateur_participants(amateur_deciding_matches)
+    amateur_infos = get_amateur_participants(tourney_name,
+                                             amateur_deciding_matches)
 
     # Sort them based on seeding.
     if randomize_seeds:
