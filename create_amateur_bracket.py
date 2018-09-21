@@ -175,7 +175,7 @@ def get_amateur_participants(tourney_name, amateur_deciding_matches):
             player[_PARAMS_CHALLONGE_USERNAME] = None
         else:
             # We can't create an amateur bracket if any of the loser's matches'
-    1       # state is 'pending'.
+            # state is 'pending'.
             num_pending_matches = sum(
                 1 for x in amateur_deciding_matches if x["state"] == "pending"
             )
