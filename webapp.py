@@ -15,8 +15,9 @@ from os.path import dirname, abspath
 import re
 from requests.exceptions import HTTPError
 
-from create_amateur_bracket import create_amateur_bracket,\
-        MainTournamentNotFarEnoughAlong, AmateurBracketAlreadyExists
+from create_amateur_bracket import AmateurBracketAlreadyExistsError
+from create_amateur_bracket import AmateurBracketRequiredMatchesIncompleteError
+from create_amateur_bracket import create_amateur_bracket
 import garpr_seeds_challonge
 
 

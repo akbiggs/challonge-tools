@@ -92,8 +92,10 @@ def seed_tournament(tourney_name, region, shuffle):
 
 def update_seeds(tourney_name, sorted_participants):
     """This is a helper function to be called from the webapp."""
-    for i, participant in enumerate(sorted_participants, 1):
-        challonge.participants.update(tourney_name, participant["id"], seed=i)
+    for seed, participant in enumerate(sorted_participants, 1):
+        challonge.participants.update(tourney_name,
+                                      participant["id"],
+                                      seed=seed)
 
 
 if __name__ == "__main__":
@@ -145,12 +147,12 @@ if __name__ == "__main__":
         print("Could not find gaR PR info for {name}, seeding {seed}"
               .format(**player))
 
-    for i, participant in enumerate(sorted_participants, 1):
+    for seed, participant in enumerate(sorted_participants, 1):
         print(
-            "{0}. {1}".format(i, util_challonge.get_participant_name(participant))
+            "{0}. {1}".format(seed, util_challonge.get_participant_name(participant))
         )
         if not args.print_only:
-            challonge.participants.update(tourney_name, participant["id"], seed=i)
+            challonge.participants.update(tourney_name, participant["id"], seed=seed)
 
     if not args.print_only:
         print("Tournament updated; see seeds at {0}/participants.".format(tourney_url))

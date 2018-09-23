@@ -1,7 +1,6 @@
 appdirs==1.4.3
 aspy.yaml==1.1.1
 attrs==18.1.0
-# black==18.6b2
 cached-property==1.4.2
 certifi==2018.4.16
 cfgv==1.1.0

@@ -34,6 +34,8 @@
       </div>
     </nav>
 
+    <!-- Get flashed message. Category is flash color. Messages are not
+    sanitized, so be careful. -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% set category = messages[0][0] %}
