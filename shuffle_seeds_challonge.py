@@ -49,7 +49,7 @@ if __name__ == "__main__":
     if not initialized:
         sys.exit(1)
 
-    tourney_name = util_challonge.parse_tourney_name(args.tourney_name)
+    tourney_name = util_challonge.extract_tourney_name(args.tourney_name)
     tourney_url = "http://challonge.com/{0}".format(tourney_name)
     tourney_info = challonge.tournaments.show(tourney_name)
     if tourney_info["state"] != "pending":

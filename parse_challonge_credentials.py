@@ -61,7 +61,7 @@ def safe_parse_challonge_credentials_from_config(config_filename):
     Config parsing errors will be caught and logged to stderr.
 
     Args:
-      config_filename: The filename of the config file to parse.
+      config_filenae: The filename of the config file to parse.
 
     Returns:
       A dictionary with {"user", "api_key"} keys parsed from the config file,

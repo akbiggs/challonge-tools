@@ -47,7 +47,7 @@ def _sort_by_seeds(values, seeds):
     return [x[1] for x in sorted_enumerated_values]
 
 
-def seed_tournament(tourney_name, region, shuffle):
+def seed_tournament(tourney_url, region, shuffle):
     """
     @params: same as argparse params
 
@@ -58,8 +58,7 @@ def seed_tournament(tourney_name, region, shuffle):
 
     """
     # Make sure the tournament exists.
-    tourney_name = util_challonge.parse_tourney_name(tourney_name)
-    tourney_url = "http://challonge.com/{0}".format(tourney_name)
+    tourney_name = util_challonge.extract_tourney_name(tourney_url)
     if not util_challonge.get_tourney_info(tourney_name):
         raise NoSuchTournamentError("No tourney exists at {0}."
                                     .format(tourney_url))
@@ -90,12 +89,11 @@ def seed_tournament(tourney_name, region, shuffle):
     return sorted_participants, players_unknown
 
 
-def update_seeds(tourney_name, sorted_participants):
+def update_seeds(tourney_url, sorted_participants):
     """This is a helper function to be called from the webapp."""
+    tourney_name = util_challonge.extract_tourney_name(tourney_url)
     for seed, participant in enumerate(sorted_participants, 1):
-        challonge.participants.update(tourney_name,
-                                      participant["id"],
-                                      seed=seed)
+        challonge.participants.update(tourney_name, participant["id"], seed=seed)
 
 
 if __name__ == "__main__":

@@ -147,8 +147,55 @@ def _get_num_amateurs(num_participants, cutoff):
 
     return num_amateurs
 
+def get_amateur_participants(tourney_name, amateur_deciding_matches):
+    """
+    Get a the players eligible for the amateur bracket.
 
-def create_amateur_bracket(tourney_name, single_elimination,
+    @params tourney_name: name of the tourney.
+    @params amateur_deciding_matches: matches that feed into the amateur
+        bracket.
+    @returns: list of players.
+    @raises MainTournamentNotFarEnoughAlong: iff main bracket still has matches
+        that need to be completed.
+
+    """
+    amateur_infos = []
+    for match in amateur_deciding_matches:
+        if match[_PARAMS_STATE] == _MATCH_STATE_COMPLETE:
+            id = match["loser_id"]
+            player = challonge.participants.show(tourney_name, id)
+        elif match[_PARAMS_STATE] == _MATCH_STATE_OPEN:
+            # If the match isn't complete, create a frankenplayer by
+            # combining the two players' tags and averaging their seed.
+            id1 = match["player1_id"]
+            id2 = match["player2_id"]
+            player1 = challonge.participants.show(tourney_name, id1)
+            player2 = challonge.participants.show(tourney_name, id2)
+
+            player = player1
+            player[_PARAMS_SEED] = (player1[_PARAMS_SEED] +
+                                    player2[_PARAMS_SEED]) // 2
+            player['display_name'] = '{} / {}'.format(player1['display_name'],
+                                                      player2['display_name'])
+            player[_PARAMS_CHALLONGE_USERNAME] = None
+        else:
+            # We can't create an amateur bracket if any of the loser's matches'
+            # state is 'pending'.
+            num_pending_matches = sum(
+                1 for x in amateur_deciding_matches
+                    if x[_PARAMS_STATE] == _MATCH_STATE_PENDING
+            )
+            err = MainTournamentNotFarEnoughAlong(
+                "Some loser's bracket matches don't have two players in them "
+                "yet. Cannot create amateur bracket.")
+            err.matches_remaining = num_pending_matches
+            raise err
+
+        amateur_infos.append(player)
+    return amateur_infos
+
+
+def create_amateur_bracket(tourney_url, single_elimination,
                            losers_round_cutoff, randomize_seeds,
                            associate_challonge_accounts=False,
                            incomplete=False, interactive=False):
@@ -164,12 +211,12 @@ def create_amateur_bracket(tourney_name, single_elimination,
 
     """
     # Create the info for our amateur's bracket.
-    tourney_name = util_challonge.parse_tourney_name(tourney_name)
+    tourney_name = util_challonge.extract_tourney_name(tourney_url)
     tourney_info = challonge.tournaments.show(tourney_name)
     tourney_title = tourney_info["name"]
     amateur_tourney_title = tourney_title + " Amateur's Bracket"
     amateur_tourney_name = tourney_name + "_amateur"
-    amateur_tourney_url = "http://challonge.com/{0}".format(amateur_tourney_name)
+    amateur_tourney_url = util_challonge.tourney_name_to_url(amateur_tourney_name)
     if single_elimination:
         amateur_tourney_type = "single elimination"
     else:
@@ -219,38 +266,8 @@ def create_amateur_bracket(tourney_name, single_elimination,
             raise err
 
     # Gather up all the amateurs.
-    amateur_infos = []
-    for match in amateur_deciding_matches:
-        if match[_PARAMS_STATE] == _MATCH_STATE_COMPLETE:
-            id = match["loser_id"]
-            player = challonge.participants.show(tourney_name, id)
-        elif match["_PARAMS_STATE"] == _MATCH_STATE_OPEN:
-            # If the match isn't complete, create a frankenplayer by
-            # combining the two players' tags and averaging their seed.
-            id1 = match["player1_id"]
-            id2 = match["player2_id"]
-            player1 = challonge.participants.show(tourney_name, id1)
-            player2 = challonge.participants.show(tourney_name, id2)
-
-            player = player1
-            player[_PARAMS_SEED] = (player1[_PARAMS_SEED] +
-                                    player2[_PARAMS_SEED]) // 2
-            player['display_name'] = '{} / {}'.format(player1['display_name'],
-                                                      player2['display_name'])
-            player[_PARAMS_CHALLONGE_USERNAME] = None
-        else:
-            # We can't create an amateur bracket if any of the loser's matches'
-            # state is 'pending'.
-            num_pending_matches = sum(
-                1 for x in amateur_deciding_matches
-                    if x[_PARAMS_STATE] == _MATCH_STATE_PENDING
-            )
-            err = AmateurBracketRequiredMatchesIncompleteError(
-                "Some loser's bracket matches don't have two players in them "
-                "yet. Cannot create amateur bracket.", num_pending_matches)
-            raise err
-
-        amateur_infos.append(player)
+    amateur_infos = get_amateur_participants(tourney_name,
+                                             amateur_deciding_matches)
 
     # Sort them based on seeding.
     if randomize_seeds:
@@ -309,9 +326,11 @@ def create_amateur_bracket(tourney_name, single_elimination,
             sys.exit(1)
 
     # We've got confirmation. Go ahead and create the amateur bracket.
+    tourney, subdomain = util_challonge.tourney_name_to_parts(amateur_tourney_name)
     challonge.tournaments.create(
-        amateur_tourney_title, amateur_tourney_name, amateur_tourney_type
-    )
+        amateur_tourney_title, tourney, amateur_tourney_type,
+        subdomain=subdomain)
+
     for amateur_params in all_amateur_params:
         challonge.participants.create(amateur_tourney_name, **amateur_params)
 
@@ -321,7 +340,6 @@ def create_amateur_bracket(tourney_name, single_elimination,
 
     return amateur_tourney_url
 
-# Nobody talks to my Alex like that. Least of all Alex.
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="Create amateur brackets.",
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)

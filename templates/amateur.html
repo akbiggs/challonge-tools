@@ -4,10 +4,9 @@
 {% block content %}
 <form method="post">
   <div class="form-group">
-    <label for="username">Main Tournament Name</label>
-    <input type="text" class="form-control" id="tourney_name" placeholder="Main Tournament Name" name="tourney_name" value="{{tourney_name}}">
-    <small id="tourney_help" class="form-text text-muted">Name of the Challonge tournament to create an amateur bracket for. This is the name at the end of the
-      URL for your tournament, e.g. challonge.com/<b>mtvmelee77</b>.
+    <label for="username">Main Tournament URL</label>
+    <input type="text" class="form-control" id="tourney_url" placeholder="Main Tournament URL" name="tourney_url" value="{{tourney_url}}">
+    <small id="tourney_help" class="form-text text-muted">URL of the Challonge tournament to create an amateur bracket for.
     </small>
   </div>
 
