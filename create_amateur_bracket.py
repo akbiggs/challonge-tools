@@ -403,5 +403,6 @@ if __name__ == "__main__":
             incomplete=args.incomplete,
             interactive=True
         )
-    except (AmateurBracketAlreadyExists, MainTournamentNotFarEnoughAlong) as e:
+    except (AmateurBracketAlreadyExistsError,
+            AmateurBracketRequiredMatchesIncompleteError) as e:
         print(e)
