@@ -149,6 +149,9 @@ def main():
                   'danger')
             return redirect(url_for('main', **params))
 
+        except challonge.api.ChallongeException as e:
+            flash(e, 'danger')
+            return redirect(url_for('main', **params))
 
         unknown_html = create_unknown_players_html(unknown_players)
 
