@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% set title = 'Create Amateur Bracket'%}
+{% block lead %}Create an amateur bracket from a main tournament.{% endblock %}
+{% block content %}
+<form method="post">
+  <div class="form-group">
+    <label for="username">Main Tournament URL</label>
+    <input type="text" class="form-control" id="tourney_url" placeholder="Main Tournament URL" name="tourney_url" value="{{tourney_url}}">
+    <small id="tourney_help" class="form-text text-muted">URL of the Challonge tournament to create an amateur bracket for.
+    </small>
+  </div>
+
+  <div class="form-group">
+    <label for="losers_round">Who qualifies for the amateur bracket?</label>
+    <select class="custom-select" id="losers_round" name="losers_round">
+      {% for i in range(1, 4) %}
+      <option value="{{i}}" {% if i == losers_round|int %} selected {% endif %}>Loser's Round {{i}}</option>
+      {% endfor %}
+    </select>
+    <small id="losers_help" class="form-text text-muted">
+      Players who are eliminated during or before this round will be added to the amateur bracket.
+    </small>
+  </div>
+
+  <div class="form-group">
+    <label for="elimination">Single or Double Elimination?</label>
+    <select class="custom-select" id="elimination" name="elimination">
+        {% for n, st in [(1, 'Single'), (2, 'Double')] %}
+          <option value="{{n}}" {% if n == elimination|int %}selected{% endif %}>{{st}} elimination</option>
+        {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="randomize" name="randomize" {% if randomize %} checked {% endif %}>
+      <label class="form-check-label" for="randomize">Randomize seeds</label>
+      <small class="form-text text-muted">If unchecked, will use the seeding from the main bracket.
+      </small>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="incomplete" name="incomplete" {% if incomplete %} checked {% endif %}>
+      <label class="form-check-label" for="incomplete">Create incomplete bracket</label>
+      <small class="form-text text-muted">If you are waiting on 1 or 2 matches to complete, you can check this to create the amateur bracket early.
+      </small>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary" {% if needs_credentials() %}disabled{% endif %}>Create!</button>
+</form>
+{% endblock %}

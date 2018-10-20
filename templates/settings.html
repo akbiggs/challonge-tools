@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set title = 'Settings' %}
+{% block lead %}We need your Challonge credentials to create and modify brackets on your behalf. This information is <i>not</i> stored on our servers.{% endblock %}
+{% block content %}
+
+
+<form method="post">
+  <div class="form-group">
+    <label for="username">Challonge Username</label>
+    <input type="text" class="form-control" name="username" id="username" placeholder="Username" value="{{username}}">
+  </div>
+
+  <div class="form-group">
+    <label for="api_key">Challonge API Key</label>
+    <div class="input-group">
+      <input type="password" class="form-control" name="api_key" id="api_key" placeholder="API Key" value="{{api_key}}">
+      <div class="input-group-append">
+        <button id="key_toggle" class="btn btn-outline-secondary" type="button"><i class="far fa-eye"></i></button>
+      </div>
+    </div>
+    <small class="form-text text-muted">
+      Your Challonge API key from <a href="https://challonge.com/settings/developer">https://challonge.com/settings/developer</a>. <b>This key has all the power of your Challonge account, so treat it as you would your password.</b>
+    </small>
+  </div>
+
+  <div class="form-group">
+    <label for="region">Region</label>
+    <select class="custom-select" id="region" name="region">
+      {% set regions = ['norcal', 'googlemtv'] %}
+      {% for r in regions %}
+        <option value="{{r}}" {% if r == region %}selected{% endif %}>{{r}}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+{% endblock %}
+
+{% block js %}
+<script>
+var toggle = $('#key_toggle');
+toggle.click(() => {
+var field = $('#api_key');
+var svg = toggle.find('svg');
+
+if (field.prop('type') == 'password') {
+  field.prop('type', 'text');
+  svg.removeClass('fa-eye').addClass('fa-eye-slash');
+} else {
+  field.prop('type', 'password');
+  svg.removeClass('fa-eye-slash').addClass('fa-eye');
+}
+
+});
+</script>
+{% endblock %}
